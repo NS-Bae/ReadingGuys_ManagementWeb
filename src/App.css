@@ -1,0 +1,163 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Noto Sans KR", sans-serif;
+  }
+
+.wrap 
+{
+  min-height: 90vh;
+  width: 95%;
+  height: 90%;
+  background: white;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.basicspace 
+{
+  min-height: 66vh;
+  width: 95%;
+  max-height: 90%;
+  background: white;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.background 
+{
+  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.place
+{
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1
+{
+  width : auto;
+  height : auto;
+  display: flex;
+  text-align: center;
+  align-items: center;
+  position: relative;
+  color: #ffa600;
+  font-size: 2em;
+  cursor : pointer;
+}
+.main_logo > a
+{
+  text-decoration: inherit;
+  color: inherit;
+}
+
+.auth_container
+{
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 7%;
+}
+.auth_container form
+{
+  width: 80%;
+  height: auto;
+}
+
+.input_place
+{
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.input_place input
+{
+  width: 70%;
+  height: 40px;
+  border-radius: 30px;
+  margin-top: 10px;
+  padding: 0px 20px;
+  border: 1px solid lightgray;
+  outline: none;
+  font-size: 1rem;
+  text-align: center;
+}
+.input_place label
+{
+  width: 70%;
+  height: auto;
+  display: flex;
+  margin-top: 10px;
+  text-align: left;
+  justify-content: left;
+  align-items: left;
+  font-weight: bolder;
+  font-size: 1.3rem;
+}
+
+.test_btn
+{
+  width: 80%;
+  max-width: 1000px;
+  height: 50px;
+  border: 0;
+  outline: none;
+  border-radius: 40px;
+  background: linear-gradient(to left, rgb(255, 77, 46), rgb(255, 155, 47));
+  color: white;
+  font-size: 1.2em;
+  font-weight: bolder;
+  cursor : pointer;
+  margin-top: 30px;
+}
+.test_btn:hover
+{
+  color: black;
+}
+
+.btn_section
+{
+  display: flex;
+  min-height: 6vh;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+.normal_btn
+{
+  background-color: white;
+  border: 0;
+  text-align: center;
+  font-size: 1.3em;
+  font-weight: bold;
+  cursor: pointer;
+}
+.normal_btn:hover
+{
+  color: #ffa600;
+}
