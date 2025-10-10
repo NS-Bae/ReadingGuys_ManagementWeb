@@ -32,7 +32,7 @@ const RegistTable = ({ onDataChange, columnInfo, rowCount, parentOptions }) => {
     {
       const response = await api.get('/academy/totallist');
       const convertData = response.data.map(item => ({
-        i1: item.academyId,
+        i1: item.hashedAcademyId,
         i2: item.academyName,
       }));
       setAcademy(convertData);
@@ -88,7 +88,7 @@ const RegistTable = ({ onDataChange, columnInfo, rowCount, parentOptions }) => {
                         <option value=''>선택</option>
                         {col.optionKey === 'academies' && selOptions.academies.map((option, idx) => (
                           <option key={idx} value={option.value}>
-                            {option.label}({option.value})
+                            {option.label}
                           </option>
                         ))}
                         {col.optionKey === 'types' && selOptions.types.map((type, idx) => (

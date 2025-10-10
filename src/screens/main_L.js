@@ -7,6 +7,7 @@ import { jwtDecode } from "jwt-decode";
 import api from '../api';
 import MainLogo from '../components/main_logo';
 import CustomModal from '../components/alert';
+import getMyInfo from '../utils/info.js';
 // AuthContent 컴포넌트 정의
 function AuthContent({ title, children }) {
   return (
@@ -36,7 +37,10 @@ function LoginForm(props) {
     e.preventDefault();
     try
     {
-      const response = await api.post('/auth/manager_login',inputs, {withCredentials: true});
+      const info = getMyInfo();
+      const payload = {...inputs, ...info};
+      console.log(payload);
+      const response = await api.post('/auth/manager_login', payload, {withCredentials: true});
       navigate("managementPage");
       const verifyToken = Cookies.get("access_token");
     
@@ -71,7 +75,7 @@ function LoginForm(props) {
     catch(error)
     {
       console.error('실패', error);
-      alert(error.response.data.message);
+      alert(error.response.data.message, 'ㅁㅁㅁㅁ');
     }
   }
   return (

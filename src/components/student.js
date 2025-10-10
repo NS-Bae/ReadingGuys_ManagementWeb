@@ -19,7 +19,7 @@ const Student = ({category, forceRender, handleCheckboxChange}) => {
     setLoading(true);
     try
     {
-      const response = await api.get('/users');
+      const response = await api.get('/users/1');
       
       const convertData = response.data.map((item) => ({
         i1: item.academy.academyId,

@@ -370,7 +370,7 @@ function MyApp()
             <button id='novation' className='normal_btn' onClick = {clickDeleteButton} disabled = {checkedRows.length === 0} >구독 갱신</button>
           )}
           {category === "management_student" && (
-            <button id='changePW' className='normal_btn' onClick = {clickDeleteButton} disabled = {checkedRows.length === 0} >비밀번호 변경</button>
+            <button id='changePW' className='normal_btn' onClick = {clickDeleteButton}  >비밀번호 변경</button>
           )}
             <button id='add' className='normal_btn' onClick = {clickAddButton} >새로 추가하기</button>
             <button id='delete' className='normal_btn' onClick = {clickDeleteButton} disabled = {checkedRows.length === 0} >삭제하기</button>
