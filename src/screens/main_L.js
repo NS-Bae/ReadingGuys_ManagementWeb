@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
-import api from '../api';
 import MainLogo from '../components/main_logo';
 import CustomModal from '../components/alert';
-import getMyInfo from '../utils/info.js';
+
+import { ManagerLogIn } from '../utils/managementData.js';
+import { verifyCookies } from '../utils/info.js';
 // AuthContent 컴포넌트 정의
 function AuthContent({ title, children }) {
   return (
@@ -37,45 +38,34 @@ function LoginForm(props) {
     e.preventDefault();
     try
     {
-      const info = getMyInfo();
-      const payload = {...inputs, ...info};
-      console.log(payload);
-      const response = await api.post('/auth/manager_login', payload, {withCredentials: true});
+      await ManagerLogIn( inputs );
       navigate("managementPage");
-      const verifyToken = Cookies.get("access_token");
-    
-      if(!verifyToken)
-      {
-        navigate("/");
-        return;
-      }
+      const result = verifyCookies();
 
-      try 
+      switch(result.status)
       {
-        const decoded = jwtDecode(verifyToken);
-        if (decoded.userType === "관리자") 
-        {
-          navigate("/managementPage");
-        }
-        else if (decoded.userType === "교사") 
-        {
-          navigate("/forT");
-        }
-        else
-        {
+        case 'noToken':
           navigate("/");
-        }
-      } 
-      catch (error) 
-      {
-        console.error("토큰 디코딩 오류:", error);
-        navigate("/");
+          return;
+        case 'managerAuthorized':
+          navigate("/managementPage");
+          return;
+        case 'teacherAuthorized':
+          navigate("/forT");
+          return;
+        case 'studentAuthorized':
+          navigate("/");
+          return;
+        default:
+          console.error("토큰 디코딩 오류:", result.message);
+          navigate("/");
+          break;
       }
     }
     catch(error)
     {
       console.error('실패', error);
-      alert(error.response.data.message, 'ㅁㅁㅁㅁ');
+      alert(error.response.data.message);
     }
   }
   return (

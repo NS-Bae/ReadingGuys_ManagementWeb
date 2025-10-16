@@ -1,10 +1,7 @@
 import '../App.css';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 
-import api from '../api';
 import MainLogo from '../components/main_logo';
 import LoginControl from '../components/loginControl';
 import NavBar from '../components/nav_Bar';
@@ -14,6 +11,11 @@ import Workbook from '../components/workbook';
 import CustomModal from '../components/alert';
 import AddModal from '../components/bigmodal';
 import ChangeModal from '../components/midmodal';
+
+import api from '../api';
+
+import { getMyInfo, verifyCookies } from '../utils/info.js';
+import { ManagerLogOut } from '../utils/managementData.js';
 
 function MyApp()
 {
@@ -33,37 +35,35 @@ function MyApp()
   const navigate = useNavigate();
 
   useEffect(() => {
-    const verifyToken = Cookies.get("access_token");
-    
-    if(!verifyToken)
-    {
-      setAlertMessage('로그인이 필요합니다.');
-      setIsModalOpen(true);
-      setStateId('notLogin');
-      return;
-    }
+    const result = verifyCookies('forManager');
 
-    try 
+    switch(result.status)
     {
-      const decoded = jwtDecode(verifyToken);
-
-      if (decoded.userType !== "관리자") 
-      {
-        setAlertMessage('관리자만 접근 할 수 있습니다');
+      case 'noToken':
+        setAlertMessage(result.message);
         setIsModalOpen(true);
-        setStateId(decoded.userType);
-      }
-    } 
-    catch (error) 
-    {
-      console.error("토큰 디코딩 오류:", error);
+        setStateId('notLogin');
+        return;
+      case 'teacherAuthorized' || 'studentAuthorized':
+        setAlertMessage(result.message);
+        setIsModalOpen(true);
+        setStateId(result.userType);
+        return;
+      case 'invalid':
+        setAlertMessage(result.message);
+        setIsModalOpen(true);
+        setStateId(result.userType);
+        return;
+      default:
+        setStateId(result.userType);
+        break;
     }
   }, [navigate]);
 
   const handleLogout = async(e) => {
     try
     {
-      const response = await api.post('/auth/logout', {}, {withCredentials: true});
+      await ManagerLogOut();
       setStateId(e.target.id);
       setAlertMessage('로그아웃에 성공했습니다. 로그아웃 페이지로 넘어갑니다.');
       setIsModalOpen(true);
@@ -75,7 +75,6 @@ function MyApp()
     }
   };
   const handleConfirm = () => {
-    console.log("확인 버튼을 클릭", buttonId);
     setIsModalOpen(false);
     if(buttonId === 'delete')
     {
@@ -102,7 +101,6 @@ function MyApp()
     setBookInfo([]);
   };
   const handleCancel = () => {
-    console.log("취소 버튼을 클릭");
     setIsModalOpen(false);
     if(stateId === 'logout' || stateId === '학생' || stateId === 'notLogin')
     {
@@ -214,7 +212,6 @@ function MyApp()
     setIsModalOpen(true);
   }
   const clickAddButton = () => {
-    console.log("add");
     setIsBigModalOpen(true);
   };
   const clickDeleteButton = (e) => {
@@ -289,11 +286,14 @@ function MyApp()
     };
     console.log(data);
 
+    const info = getMyInfo();
+    const payload = {...data, ...info};
+
     if(category === "management_workbook")
     {
       try
       {
-        const response = await api.post(`/${link}/adddata`, data, {
+        const response = await api.post(`/${link}/adddata`, payload, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
