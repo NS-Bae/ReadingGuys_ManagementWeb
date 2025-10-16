@@ -15,7 +15,7 @@ import ChangeModal from '../components/midmodal';
 import api from '../api';
 
 import { getMyInfo, verifyCookies } from '../utils/info.js';
-import { ManagerLogOut } from '../utils/managementData.js';
+import { ManagerLogOut } from '../utils/auth.js';
 
 function MyApp()
 {
@@ -229,7 +229,6 @@ function MyApp()
     }
   };
   
-
   async function deleteData()
   {
     switch(category)

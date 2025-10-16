@@ -7,7 +7,7 @@ import { jwtDecode } from "jwt-decode";
 import MainLogo from '../components/main_logo';
 import CustomModal from '../components/alert';
 
-import { ManagerLogIn } from '../utils/managementData.js';
+import { ManagerLogIn } from '../utils/auth.js';
 import { verifyCookies } from '../utils/info.js';
 // AuthContent 컴포넌트 정의
 function AuthContent({ title, children }) {
