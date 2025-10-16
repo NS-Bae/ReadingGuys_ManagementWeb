@@ -1,16 +1,11 @@
 import api from '../api';
-import { getMyInfo } from './info';
 
 const ManagerLogIn = ( data ) => {
-  const info = getMyInfo();
-  const payload = {...data, ...info};
-  return api.post('/auth/manager_login', payload, {withCredentials: true});
+  return api.post('/auth/manager_login', data);
 };
 
 const ManagerLogOut = () => {
-  const info = getMyInfo();
-  console.log(info);
-  return api.post('/auth/manager_logout', info, {withCredentials: true});
+  return api.post('/auth/manager_logout');
 };
 
 export { ManagerLogIn, ManagerLogOut };

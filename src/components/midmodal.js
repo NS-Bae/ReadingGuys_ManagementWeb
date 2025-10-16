@@ -14,6 +14,7 @@ const ChangeModal = ({ isOpen, onConfirm, onCancel, checkedRow, category }) => {
     { key: "name", label: "이름", type: 'text' },
     { key: "academies", label: "학원", type: 'text' },
     { key: "types", label: "사용자 분류", type: 'select', option: ["학생", "교사"] },
+    { key: "pk", label: "pk", type: 'text' },
   ];
   const workbookColumns = [
     { key: "1", label: "학원ID", type: 'text' },
@@ -21,6 +22,7 @@ const ChangeModal = ({ isOpen, onConfirm, onCancel, checkedRow, category }) => {
   ];
 
   useEffect(() => {
+    console.log(checkedRow);
     if(!isOpen) {
       setTableData([]);
     }
@@ -38,19 +40,22 @@ const ChangeModal = ({ isOpen, onConfirm, onCancel, checkedRow, category }) => {
       columns.forEach((col) => {
         switch (col.key) {
           case "id":
-            mappedItem[col.key] = item.id;
+            mappedItem[col.key] = item.rawUserId;
             break;
           case "pw":
             mappedItem[col.key] = "";
             break;
           case "name":
-            mappedItem[col.key] = item.userName;
+            mappedItem[col.key] = item.rawUserName;
             break;
           case "academies":
-            mappedItem[col.key] = `${item.academy.academyName}(${item.academy.academyId})`;
+            mappedItem[col.key] = `${item.rawAcademyName}`;
             break;
           case "types":
             mappedItem[col.key] = item.userType;
+            break;
+          case "pk": 
+            mappedItem[col.key] = item.hashedUserId;
             break;
           default:
             mappedItem[col.key] = item[col.key];

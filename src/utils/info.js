@@ -1,12 +1,6 @@
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
-const getMyInfo = () => {
-  return {
-    userAgent: navigator.userAgent,
-  };
-};
-
 const verifyCookies = ( type ) => {
   const userToken = Cookies.get("access_token");
 
@@ -40,4 +34,4 @@ const verifyCookies = ( type ) => {
   }
 }
 
-export { getMyInfo, verifyCookies };
+export { verifyCookies };

@@ -14,8 +14,9 @@ import ChangeModal from '../components/midmodal';
 
 import api from '../api';
 
-import { getMyInfo, verifyCookies } from '../utils/info.js';
+import { verifyCookies } from '../utils/info.js';
 import { ManagerLogOut } from '../utils/auth.js';
+import { dataDelete, addFormInfo, addNormalInfo, changeInfo, updateNovation } from '../utils/managementData.js';
 
 function MyApp()
 {
@@ -31,7 +32,6 @@ function MyApp()
   const [forceRender, setForceRender] = useState(0);
   const pageId = 'manager';
 
-  let link = '';
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -170,10 +170,13 @@ function MyApp()
     else
     {
       const convertedData = Object.keys(data).map(key => {
+        console.log(data, 'qqq', key,'pppp', data[key]);
         const userInfo = data[key];
         const result = { id: key, ...userInfo };
         return result;
       });
+
+      console.log(convertedData);
 
       changeData(convertedData);
     }
@@ -231,23 +234,11 @@ function MyApp()
   
   async function deleteData()
   {
-    switch(category)
-    {
-      case "management_academy" : link = 'academy'; break;
-      case "management_student" : link = 'users'; break;
-      case "management_workbook" : link = 'workbook'; break;
-      default: link = ''; break;
-    };
-
     try
     {
-      console.log(checkedRows);
-      const response = await api.delete(`/${link}/deletedata`, {
-        data: {checkedRows},
-      });
+      const response = await dataDelete(category, checkedRows);
       console.log("삭제성공", response.data);
       alert(`${response.data.deletedCount}개의 정보를 삭제했습니다`);
-
       setForceRender((prev) => prev + 1);
     }
     catch(error)
@@ -257,16 +248,11 @@ function MyApp()
   };
   async function novationData()
   {
-    console.log('b', buttonId, checkedRows);
     try
     {
-      const response = await api.patch('/academy/novation', {
-        checkedRows,
-      });
-      
+      const response = await updateNovation(checkedRows);
       console.log("구독정보 업데이트에 성공했습니다.", response.data);
       alert(`${response.data.updatedCount}개 학읜의 구독 정보를 변경했습니다.`);
-      
       setForceRender((prev) => prev + 1);
     }
     catch(error)
@@ -276,28 +262,11 @@ function MyApp()
   };
   async function addData(data)
   {
-    switch(category)
-    {
-      case "management_academy" : link = 'academy'; break;
-      case "management_student" : link = 'users'; break;
-      case "management_workbook" : link = 'workbook'; break;
-      default: link = ''; break;
-    };
-    console.log(data);
-
-    const info = getMyInfo();
-    const payload = {...data, ...info};
-
     if(category === "management_workbook")
     {
       try
       {
-        const response = await api.post(`/${link}/adddata`, payload, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        
+        const response = await addFormInfo(data);
         alert(`${response.data.addedCount}개의 정보를 추가했습니다`);
         setForceRender((prev) => prev + 1);
       }
@@ -310,12 +279,9 @@ function MyApp()
     {
       try
       {
-        const response = await api.post(`/${link}/adddata`, {
-          data,
-        });
+        const response = await addNormalInfo(category, data);
         console.log("추가 성공", response.data);
-        alert(`${response.data.addedCount}개의 정보를 추가했습니다`);
-
+        alert(`${response.data.createdCount}개의 정보를 추가했습니다`);
         setForceRender((prev) => prev + 1);
       }
       catch(error)
@@ -326,18 +292,11 @@ function MyApp()
   };
   async function changeData(data)
   {
-    switch(category)
-    {
-      case "management_student" : link = 'users'; break;
-      case "management_workbook" : link = 'workbook'; break;
-      default: link = ''; break;
-    };
     try
     {
-      const response = await api.post(`/${link}/changedata`, { data });
+      const response = await changeInfo(category, data);
       console.log("추가 성공", response.data);
       alert(`${response.data.updatedCount}개의 정보를 변경했습니다`);
-
       setForceRender((prev) => prev + 1);
     }
     catch(error)
