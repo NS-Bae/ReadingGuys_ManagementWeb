@@ -41,10 +41,10 @@ const ListTable = ({category, columns, info}) => {
           <tbody style = {styles.body_table}>
             {Array.from({ length: Math.min(info.length, 15) }, (_, i) => (
               <tr
-                key = {`${info[i].id}_${info[i].userName}`}
+                key = {`${info[i].id}_${info[i].hashedUserId}`}
               >
-                <td style={styles.table_data}>{info[i].id}</td>
-                <td style={styles.table_data}>{info[i].userName}</td>
+                <td style={styles.table_data}>{info[i].rawUserId}</td>
+                <td style={styles.table_data}>{info[i].rawUserName}</td>
                 <td style={styles.table_data}>{info[i].userType}</td>
               </tr>
             ))}

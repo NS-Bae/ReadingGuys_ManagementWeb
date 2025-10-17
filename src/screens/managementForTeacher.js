@@ -1,10 +1,8 @@
 import '../App.css';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 
-import api from '../api';
+/* import api from '../api'; */
 import MainLogo from '../components/main_logo';
 import LoginControl from '../components/loginControl';
 import NavBar from '../components/nav_Bar';
@@ -13,16 +11,19 @@ import CustomModal from '../components/alert';
 import ListModal from '../components/listModal';
 import ExamRecord from '../components/examRecord';
 
+import { verifyCookies } from '../utils/info.js';
+import { ManagerLogOut } from '../utils/auth.js';
+import { searchMyAcademy, searchMyAcademyStudent, searchMyAcademyAllStudentRecord, searchMyAcademyOneStudentRecord } from '../utils/search.js';
+
 function MyApp() 
 {
   const [category, setCategory] = useState('basic');
   const [alertMessage, setAlertMessage] = useState('');
   const [stateId, setStateId] = useState('');
   const [userCount, setUserCount] = useState(0);
-  const [userInfo, setUserInfo] = useState([]);
   const [academyInfo, setAcademyInfo] = useState([]);
-  const [stuInfo, setStuInfo] = useState([]);
-  const [stuList, setStuList] = useState([]);
+  const [stuInfo, setStuInfo] = useState([]);//소속인원 전부
+  const [stuList, setStuList] = useState([]);//소속 학생만
   const [recordInfo, setRecordInfo] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isListModalOpen, setIsListModalOpen] = useState(false);
@@ -36,50 +37,39 @@ function MyApp()
   const navigate = useNavigate();
 
   useEffect(() => {
-    const verifyToken = Cookies.get("access_token");
-    
-    if(!verifyToken)
-    {
-      setAlertMessage('로그인이 필요합니다.');
-      setIsModalOpen(true);
-      setStateId('notLogin');
-      return;
-    }
+    const result = verifyCookies('forManager');
 
-    try 
+    switch(result.status)
     {
-      const decoded = jwtDecode(verifyToken);
-      setUserInfo(decoded.id);
-
-      if (decoded.userType === "관리자") 
-      {
-        setAlertMessage('교사용 페이지입니다. 관리자계정이므로 관리자 페이지로 넘어갑니다.');
+      case 'noToken':
+        setAlertMessage(result.message);
         setIsModalOpen(true);
-        setStateId(decoded.userType);
-      }
-      if (decoded.userType === "학생") 
-      {
-        setAlertMessage('접근권한이 없습니다');
+        setStateId('notLogin');
+        return;
+      case 'managerAuthorized' || 'studentAuthorized':
+        setAlertMessage(result.message);
         setIsModalOpen(true);
-        setStateId(decoded.userType);
-      }
-    } 
-    catch (error) 
-    {
-      console.error("토큰 디코딩 오류:", error);
+        setStateId(result.userType);
+        return;
+      case 'invalid':
+        setAlertMessage(result.message);
+        setIsModalOpen(true);
+        setStateId(result.userType);
+        return;
+      default:
+        setStateId(result.userType);
+        break;
     }
   }, [navigate]);
   useEffect(() => {
-    if (category === 'check_stdent_state') {
-      getAcademyInfo(userInfo);
-      getAcademyStudentList(userInfo);
-    }
-  }, [category]);
+    getAcademyInfo();
+    getAcademyStudentList();
+  }, []);
 
   const handleLogout = async(e) => {
     try
     {
-      const response = await api.post('/auth/logout', {}, {withCredentials: true});
+      await ManagerLogOut();
       setStateId(e.target.id);
       setAlertMessage('로그아웃에 성공했습니다. 로그아웃 페이지로 넘어갑니다.');
       setIsModalOpen(true);
@@ -115,57 +105,47 @@ function MyApp()
     }
   };
   const handleListModalConfirm = () => {
-    console.log("확인 버튼을 클릭",category);
     setIsListModalOpen(false);
   };
   const handleListModalCancel = () => {
-    console.log("취소 버튼을 클릭");
     setIsListModalOpen(false);
   };
   const onNavbarButtonClick = (e) => {
     setCategory(e.target.id);
     if(e.target.id === 'academy')
     {
-      getAcademyInfo(userInfo);
+      getAcademyInfo();
     }
+    console.log(stuList);
   };
-
   const clickDetail = () => {
-    console.log(isListModalOpen);
-    getAcademyStudentList(userInfo);
+    getAcademyStudentList();
     setIsListModalOpen(true);
   };
 
-  async function getAcademyInfo(data)
+  async function getAcademyInfo()
   {
-    if(userInfo.length === 0) return ;
     try
     {
-      const response = await api.post('/academy/myinfo', {userInfo});
-      setAcademyInfo(response.data.myAcademy);
-      setUserCount(response.data.myAcademyStudent);
+      const result = await searchMyAcademy();
+      setAcademyInfo(result.data.myAcademy);
+      setUserCount(result.data.myAcademyStudent);
     }
     catch(error)
     {
       console.error('데이터 로딩 실패', error);
     }
   };
-  async function getAcademyStudentList(data)
+  async function getAcademyStudentList()
   {
-    if(userInfo.length === 0) return ;
     try
     {
-      const response = await api.post('/academy/academystudentlist', {userInfo});
-      if(category === 'check_stdent_state')
-      {
-        const refineData = response.data.myAcademyStudent.map(({id, userName}) => ({id, userName}));
-        console.log(refineData);
-        setStuList(refineData);
-      }
-      else
-      {
-        setStuInfo(response.data.myAcademyStudent);
-      }
+      const result = await searchMyAcademyStudent();
+      const refineData = result.data.myAcademyStudent
+        .filter(({userType}) => userType === '학생')
+        .map(({hashedUserId, rawUserId, rawUserName}) => ({hashedUserId, rawUserId, rawUserName}));
+      setStuList(refineData);
+      setStuInfo(result.data.myAcademyStudent);
     }
     catch(error)
     {
@@ -174,33 +154,28 @@ function MyApp()
   };
   async function getExamRecord(data)
   {
-    const academyId = academyInfo.academyId;
-    console.log(data);
-    if(data !== '')
+    if(data === 'all')
     {
-      if(data === 'all')
+      try
       {
-        try
-        {
-          const response = await api.post('/records/allstudent', { academyId });
-          setRecordInfo(response.data);
-        }
-        catch(error)
-        {
-          console.error('데이터 로딩 실패', error);
-        }
+        const result = await searchMyAcademyAllStudentRecord();
+        setRecordInfo(result.data);
       }
-      else
+      catch(error)
       {
-        try
-        {
-          const response = await api.post('/records/onestudent', { data, academyId });
-          setRecordInfo(response.data);
-        }
-        catch(error)
-        {
-          console.error('데이터 로딩 실패', error);
-        }
+        console.error('데이터 로딩 실패', error);
+      }
+    }
+    if(data !== '' && data !== 'all')
+    {
+      try
+      {
+        const result = await searchMyAcademyOneStudentRecord(data);
+        setRecordInfo(result.data);
+      }
+      catch(error)
+      {
+        console.error('데이터 로딩 실패', error);
       }
     }
   };

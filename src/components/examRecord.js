@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import ListTable from './listTable';
 
-const ExamRecord = ({ category, stuList, info, getExamRecord }) => {
+const ExamRecord = ({ category, stuList/*학생*/ , info/*시험기록*/ , getExamRecord }) => {
   const [student, setSutdent] = useState('');
   const columns = [
     { key: "1", label: "학생 ID" },
@@ -11,16 +11,17 @@ const ExamRecord = ({ category, stuList, info, getExamRecord }) => {
     { key: "4", label: "점수" },
   ];
 
+  
   useEffect(() => {
+    console.log(student);
     getExamRecord(student);
-    console.log(info);
   }, [student])
 
-  const transformedData = stuList.reduce((acc, { id, userName }) => {
-    acc[`${id}_${userName}`] = `${userName}(${id})`;
+  const transformedData = stuList.reduce((acc, { hashedUserId, rawUserId, rawUserName }) => {
+    acc[`${hashedUserId}`] = `${rawUserName}(${rawUserId})`;
     return acc;
   }, {});
-
+  console.log(transformedData);
   const handleChange = (e) => {
     setSutdent(e.target.value);
   };
@@ -30,8 +31,8 @@ const ExamRecord = ({ category, stuList, info, getExamRecord }) => {
       <select id="stuList" onChange={handleChange}>
         <option value={''}>선택하세요</option>
         <option value={'all'}>전체보기</option>
-        {Object.entries(transformedData).map(([key, value]) => (
-          <option key={key} value={key}>{value}</option>
+        {Object.entries(transformedData).map(([key, label]) => (
+          <option key={key} value={key}>{label}</option>
         ))}
       </select>
       <ListTable category={category} columns = {columns} info = {info} />

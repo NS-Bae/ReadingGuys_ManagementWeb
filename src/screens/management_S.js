@@ -12,8 +12,6 @@ import CustomModal from '../components/alert';
 import AddModal from '../components/bigmodal';
 import ChangeModal from '../components/midmodal';
 
-import api from '../api';
-
 import { verifyCookies } from '../utils/info.js';
 import { ManagerLogOut } from '../utils/auth.js';
 import { dataDelete, addFormInfo, addNormalInfo, changeInfo, updateNovation } from '../utils/managementData.js';
@@ -138,6 +136,7 @@ function MyApp()
         {
           formData.append("file", fileItem);
         };
+        console.log(formData);
         addData(formData);
       }
     }
@@ -170,7 +169,6 @@ function MyApp()
     else
     {
       const convertedData = Object.keys(data).map(key => {
-        console.log(data, 'qqq', key,'pppp', data[key]);
         const userInfo = data[key];
         const result = { id: key, ...userInfo };
         return result;
@@ -267,7 +265,7 @@ function MyApp()
       try
       {
         const response = await addFormInfo(data);
-        alert(`${response.data.addedCount}개의 정보를 추가했습니다`);
+        alert(`${response.message}`);
         setForceRender((prev) => prev + 1);
       }
       catch(error)
@@ -281,7 +279,7 @@ function MyApp()
       {
         const response = await addNormalInfo(category, data);
         console.log("추가 성공", response.data);
-        alert(`${response.data.createdCount}개의 정보를 추가했습니다`);
+        alert(`${response.data.addedCount}개의 정보를 추가했습니다`);
         setForceRender((prev) => prev + 1);
       }
       catch(error)

@@ -24,7 +24,8 @@ const addNormalInfo = ( category, data ) => {
 };
 
 const addFormInfo = ( data ) => {
-  return api.post(`/workbook/adddata`, { data }, {
+  console.log(data, 'aaa');
+  return api.post(`/workbook/adddata`, data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -37,6 +38,7 @@ const changeInfo = ( category, data ) => {
   {
     case "management_academy" : link = 'academy'; break;
     case "management_student" : link = 'users'; break;
+    case "management_workbook" : link = 'workbook'; break;
     default: link = ''; break;
   };
   console.log(data);
