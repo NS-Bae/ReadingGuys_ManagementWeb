@@ -13,6 +13,7 @@ const MyNavbar = ({ pageId, onButtonClick }) => {
           <Button id="management_academy" sx={styles.button} onClick={onButtonClick}>학원 관리</Button>
           <Button id="management_student" sx={styles.button} onClick={onButtonClick}>회원 관리</Button>
           <Button id="management_workbook" sx={styles.button} onClick={onButtonClick}>문제집 관리</Button>
+          <Button id="management_terms" sx={styles.button} onClick={onButtonClick}>약관 관리</Button>
         </Toolbar>
       }
       {pageId === 'teacher' &&

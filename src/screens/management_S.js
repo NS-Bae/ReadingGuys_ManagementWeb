@@ -8,6 +8,7 @@ import NavBar from '../components/nav_Bar';
 import Academy from '../components/academy';
 import Student from '../components/student';
 import Workbook from '../components/workbook';
+import Terms from '../components/terms.js';
 import CustomModal from '../components/alert';
 import AddModal from '../components/bigmodal';
 import ChangeModal from '../components/midmodal';
@@ -318,6 +319,9 @@ function MyApp()
           {category==='management_workbook' && (
             <Workbook category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} handleToggle={handleToggle} />
           )}
+          {category==='management_terms' && (
+            <Terms category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} handleToggle={handleToggle} />
+          )}
         </div>
         <div className='btn_section'>
         {category !== 'basic' && (
@@ -328,8 +332,12 @@ function MyApp()
           {category === "management_student" && (
             <button id='changePW' className='normal_btn' onClick = {clickDeleteButton}  >비밀번호 변경</button>
           )}
-            <button id='add' className='normal_btn' onClick = {clickAddButton} >새로 추가하기</button>
-            <button id='delete' className='normal_btn' onClick = {clickDeleteButton} disabled = {checkedRows.length === 0} >삭제하기</button>
+          {category !== "management_terms" && (
+            <>
+              <button id='add' className='normal_btn' onClick = {clickAddButton} >새로 추가하기</button>
+              <button id='delete' className='normal_btn' onClick = {clickDeleteButton} disabled = {checkedRows.length === 0} >삭제하기</button>
+            </>
+          )}
           </>
         )}
         </div>
