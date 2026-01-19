@@ -14,7 +14,7 @@ const SidebarAccordion = ({ active, onChange }) => {
     active.main === main && active.action === action;
 
   return (
-    <Box sx={{ width: 260, borderRight: '1px solid #e0e0e0', bgcolor: '#fafafa', height: '100%', overflowY: 'auto' }} >
+    <Box style={ accordionBox } >
       <Accordion disableGutters square defaultExpanded={active.main === 'privacy'} >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <LockIcon fontSize="small" style={{ marginRight: 8 }} />
@@ -84,3 +84,10 @@ const SidebarAccordion = ({ active, onChange }) => {
 };
 
 export default SidebarAccordion;
+
+const accordionBox = {
+  width: 260,
+  borderRight: '1px solid #e0e0e0',
+  bgcolor: '#fafafa',
+  overflowY: 'auto'
+}
