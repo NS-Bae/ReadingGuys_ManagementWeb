@@ -15,7 +15,7 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
 
   const renderContent = () => {
     if (activeMenu.main === 'privacy' && activeMenu.action === 'edit') {
-      return <div backgroundColor='red'><p>개인정보 처리방침 편집 에디터</p></div>;
+      return <div backgroundColor='red'><TermsMarkdownEditor /></div>;
     }
     if (activeMenu.main === 'privacy' && activeMenu.action === 'history') {
       return <div>개인정보 처리방침 버전 히스토리</div>;
@@ -27,13 +27,13 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
       return <div>이용약관 버전 히스토리</div>;
     }
     if (activeMenu.main === 'credits' && activeMenu.action === 'edit') {
-      return <div>크레딧 편집 에디터</div>;
+      return <div><TermsMarkdownEditor /></div>;
     }
     if (activeMenu.main === 'credits' && activeMenu.action === 'history') {
       return <div>크레딧 버전 히스토리</div>;
     }
     if (activeMenu.main === 'about' && activeMenu.action === 'edit') {
-      return <div>사업자 정보 편집 에디터</div>;
+      return <div><TermsMarkdownEditor /></div>;
     }
     if (activeMenu.main === 'about' && activeMenu.action === 'history') {
       return <div>사업자 정보 버전 히스토리</div>;
