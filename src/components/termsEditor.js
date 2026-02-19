@@ -5,35 +5,31 @@ import remarkGfm from 'remark-gfm';
 
 const TermsMarkdownEditor = ({ title, value, onChange }) => {
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box style = { BigBox }>
             <Typography variant="h6">{title}</Typography>
-
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'stretch' }}>
-                {/* 왼쪽: 입력 */}
-                <Paper variant="outlined" sx={{ flex: 1, p: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, opacity: 0.8 }}>
-                    편집 (Markdown)
-                </Typography>
-                <TextField
-                    multiline
-                    minRows={18}
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    placeholder={`# 제목\n\n여기에 마크다운으로 작성해줘...`}
-                    fullWidth
-                />
+            <Box style={ SmallBox }>
+                <Paper variant="outlined" style={ EditorPlace }>
+                    <Typography variant="subtitle2" style={ HeadLine }>
+                        편집 (Markdown)
+                    </Typography>
+                    <TextField
+                        multiline
+                        minRows={18}
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        placeholder={`# 제목\n\n여기에 마크다운방식으로 작성 부탁합니다.`}
+                        fullWidth
+                    />
                 </Paper>
-                {/* 오른쪽: 미리보기 */}
-                <Paper variant="outlined" sx={{ flex: 1, p: 2, overflow: 'auto' }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1, opacity: 0.8 }}>
+                <Paper variant="outlined" style={ EditorPlace }>
+                    <Typography variant="subtitle2" style={ HeadLine }>
                         미리보기
                     </Typography>
-
-                <Box sx={{ lineHeight: 1.7 }}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {value || '*미리볼 내용이 아직 없어…*'}
-                    </ReactMarkdown>
-                </Box>
+                    <Box sx={{ lineHeight: 1.7 }}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {value || '*미리볼 내용이 아직 없습니다.'}
+                        </ReactMarkdown>
+                    </Box>
                 </Paper>
             </Box>
         </Box>
@@ -41,3 +37,27 @@ const TermsMarkdownEditor = ({ title, value, onChange }) => {
 }
 
 export default TermsMarkdownEditor;
+
+const BigBox = {
+    display: 'flex',
+    width: '100%',
+    flexDirection: 'column',
+    gap: '2px',
+    backgroundColor: 'white'
+};
+const SmallBox = {
+    display: 'flex',
+    width: '100%',
+    gap: '20px',
+    alignItems: 'stretch'
+};
+const EditorPlace = {
+    flex: 1,
+    width: '100%',
+    padding: '2px',
+};
+const HeadLine = {
+    marginTop: '10px',
+    marginBottom: '10px',
+    opacity: 0.8,
+};

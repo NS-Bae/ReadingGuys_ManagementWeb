@@ -86,7 +86,7 @@ const SidebarAccordion = ({ active, onChange }) => {
 export default SidebarAccordion;
 
 const accordionBox = {
-  width: 260,
+  width: '100%',
   borderRight: '1px solid #e0e0e0',
   bgcolor: '#fafafa',
   overflowY: 'auto'
