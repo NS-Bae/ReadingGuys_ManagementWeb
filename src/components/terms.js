@@ -1,6 +1,5 @@
 import '../App.css';
 import React, { useEffect, useState, useCallback } from 'react';
-import { alignItems, flexDirection, maxWidth, minHeight } from '@mui/system';
 
 import api from '../api';
 import SidebarAccordion from './sideSubNavBar';
@@ -17,35 +16,35 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
     service: '',
     credits: '',
     about: '',
-  })
+  });
 
   const renderContent = () => {
     if (activeMenu.main === 'privacy' && activeMenu.action === 'edit') {
-      return <div style={ RightContent }><TermsMarkdownEditor title='개인정보 처리방침 작성' value={documents.privacy} onChange={(txt) => handleChangeText('privacy', txt)} /></div>;
+      return <div style={ rightContent }><TermsMarkdownEditor title='개인정보 처리방침 작성' value={documents.privacy} onChange={(txt) => handleChangeText('privacy', txt)} /></div>;
     }
     if (activeMenu.main === 'privacy' && activeMenu.action === 'history') {
       return <div>개인정보 처리방침 버전 히스토리</div>;
     }
     if (activeMenu.main === 'service' && activeMenu.action === 'edit') {
-      return <div style={ RightContent }><TermsMarkdownEditor title='이용약관 작성' value={documents.service} onChange={(txt) => handleChangeText('service', txt)} /></div>;
+      return <div style={ rightContent }><TermsMarkdownEditor title='이용약관 작성' value={documents.service} onChange={(txt) => handleChangeText('service', txt)} /></div>;
     }
     if (activeMenu.main === 'service' && activeMenu.action === 'history') {
       return <div>이용약관 버전 히스토리</div>;
     }
     if (activeMenu.main === 'credits' && activeMenu.action === 'edit') {
-      return <div style={ RightContent }><TermsMarkdownEditor title='크레딧 작성' value={documents.credits} onChange={(txt) => handleChangeText('credits', txt)} /></div>;
+      return <div style={ rightContent }><TermsMarkdownEditor title='크레딧 작성' value={documents.credits} onChange={(txt) => handleChangeText('credits', txt)} /></div>;
     }
     if (activeMenu.main === 'credits' && activeMenu.action === 'history') {
       return <div>크레딧 버전 히스토리</div>;
     }
     if (activeMenu.main === 'about' && activeMenu.action === 'edit') {
-      return <div style={ RightContent }><TermsMarkdownEditor title='사업자 정보 작성' value={documents.about} onChange={(txt) => handleChangeText('about', txt)} /></div>;
+      return <div style={ rightContent }><TermsMarkdownEditor title='사업자 정보 작성' value={documents.about} onChange={(txt) => handleChangeText('about', txt)} /></div>;
     }
     if (activeMenu.main === 'about' && activeMenu.action === 'history') {
       return <div>사업자 정보 버전 히스토리</div>;
     }
 
-    return <div>none</div>;
+    return <div></div>;
   };
 
   const handleActiveType = ({ main, action }) => {
@@ -56,13 +55,29 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
       ...prev,
       [type]: text,
     }));
-  }
+  };
+
+  const clickAddButton = async() => {
+    const { main } = activeMenu;
+    const contents = documents[main];
+    console.log(contents);
+    try
+    {
+      const response = await api.post('/agreement/adddata', { contents, main });
+
+      console.log(response);
+    }
+    catch(error)
+    {
+      console.error('약관을 등록하지 못했습니다.');
+    }
+  };
 
   const getAllTerms = useCallback( async() => {
     setLoading(true);
     try
     {
-      const response = await api.get('/terms/alllist');
+      const response = await api.get('/agreement/alllist');
     }
     catch(error)
     {
@@ -77,10 +92,15 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
     }, [forceRender, getAllTerms]);
 
   return (
-    <div style={ bigBox }>
-      <div style = { leftBox }><SidebarAccordion active={activeMenu} onChange={handleActiveType} /></div>
-      <div style={ rightBox }>{ loading ? <p>데이터 불러오는 중...</p> : renderContent() }</div>
-    </div>
+    <>
+      <div style={ bigBox }>
+        <div style = { leftBox }><SidebarAccordion active={activeMenu} onChange={handleActiveType} /></div>
+        <div style={ rightBox }>{ loading ? <p>데이터 불러오는 중...</p> : renderContent() }</div>
+      </div>
+      <div style = { buttonBox }>
+        {activeMenu.main !== 'none' && activeMenu.action === 'edit' && <button id='add' style={ normalButton } onClick={clickAddButton}>등록하기</button>}
+      </div>
+    </>
   );
 }
 
@@ -114,8 +134,24 @@ const rightBox = {
   minHeight: '70vh',
   justifyContent: 'flex-start',
 };
-const RightContent = {
+const rightContent = {
   display: 'flex',
   width: '100%',
   height: '100%',
 };
+const buttonBox = {
+  display: 'flex',
+  minHeight: '6vh',
+  width: '100%',
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  marginTop: '15px',
+};
+const normalButton = {
+  backgroundColor: 'white',
+  border: 0,
+  textAlign: 'center',
+  fontSize: '1.3em',
+  fontWeight: 'bold',
+  cursor: 'pointer',
+}

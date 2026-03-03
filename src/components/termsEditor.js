@@ -25,7 +25,7 @@ const TermsMarkdownEditor = ({ title, value, onChange }) => {
                     <Typography variant="subtitle2" style={ HeadLine }>
                         미리보기
                     </Typography>
-                    <Box sx={{ lineHeight: 1.7 }}>
+                    <Box>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {value || '*미리볼 내용이 아직 없습니다.'}
                         </ReactMarkdown>
@@ -47,13 +47,11 @@ const BigBox = {
 };
 const SmallBox = {
     display: 'flex',
-    width: '100%',
     gap: '20px',
     alignItems: 'stretch'
 };
 const EditorPlace = {
-    flex: 1,
-    width: '100%',
+    flex: '1 1 360px',
     padding: '2px',
 };
 const HeadLine = {
