@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import api from '../api';
 import SidebarAccordion from './sideSubNavBar';
 import TermsMarkdownEditor from './termsEditor';
+import TermsList from './termsList';
 
 const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) => {
   const [loading, setLoading] = useState(true);
@@ -17,31 +18,40 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
     credits: '',
     about: '',
   });
+  const [list, setList] = useState();
+
+  const columns = [
+    { key: "1", label: "ID" },
+    { key: "2", label: "파일 이름" },
+    { key: "3", label: "작성일" },
+    { key: "4", label: "작성자" },
+    { key: "5", label: "시행일" },
+  ];
 
   const renderContent = () => {
     if (activeMenu.main === 'privacy' && activeMenu.action === 'edit') {
       return <div style={ rightContent }><TermsMarkdownEditor title='개인정보 처리방침 작성' value={documents.privacy} onChange={(txt) => handleChangeText('privacy', txt)} /></div>;
     }
     if (activeMenu.main === 'privacy' && activeMenu.action === 'history') {
-      return <div>개인정보 처리방침 버전 히스토리</div>;
+      return <TermsList title='개인정보 처리방침' columns = {columns} info = {list} handleToggle = {handleToggle} />;
     }
     if (activeMenu.main === 'service' && activeMenu.action === 'edit') {
       return <div style={ rightContent }><TermsMarkdownEditor title='이용약관 작성' value={documents.service} onChange={(txt) => handleChangeText('service', txt)} /></div>;
     }
     if (activeMenu.main === 'service' && activeMenu.action === 'history') {
-      return <div>이용약관 버전 히스토리</div>;
+      return <TermsList title='이용약관' columns = {columns} info = {list} handleToggle = {handleToggle} />;
     }
     if (activeMenu.main === 'credits' && activeMenu.action === 'edit') {
       return <div style={ rightContent }><TermsMarkdownEditor title='크레딧 작성' value={documents.credits} onChange={(txt) => handleChangeText('credits', txt)} /></div>;
     }
     if (activeMenu.main === 'credits' && activeMenu.action === 'history') {
-      return <div>크레딧 버전 히스토리</div>;
+      return <TermsList title='크레딧' columns = {columns} info = {list} handleToggle = {handleToggle} />;
     }
     if (activeMenu.main === 'about' && activeMenu.action === 'edit') {
       return <div style={ rightContent }><TermsMarkdownEditor title='사업자 정보 작성' value={documents.about} onChange={(txt) => handleChangeText('about', txt)} /></div>;
     }
     if (activeMenu.main === 'about' && activeMenu.action === 'history') {
-      return <div>사업자 정보 버전 히스토리</div>;
+      return <TermsList title='사업자 정보' columns = {columns} info = {list} handleToggle = {handleToggle} />;
     }
 
     return <div></div>;
@@ -64,8 +74,6 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
     try
     {
       const response = await api.post('/agreement/adddata', { contents, main });
-
-      console.log(response);
     }
     catch(error)
     {
@@ -78,6 +86,8 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
     try
     {
       const response = await api.get('/agreement/alllist');
+
+      setList(response.data);
     }
     catch(error)
     {

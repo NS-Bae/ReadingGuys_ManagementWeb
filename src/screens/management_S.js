@@ -212,7 +212,7 @@ function MyApp()
     setAlertMessage('문제집의 공개상태를 바꾸겠습니까?');
     setButtonId('toggle');
     setIsModalOpen(true);
-  }
+  };
   const clickAddButton = () => {
     setIsBigModalOpen(true);
   };
