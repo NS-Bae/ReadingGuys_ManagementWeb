@@ -201,11 +201,8 @@ function MyApp()
   const handleMarkdownModal = (e, data) => {
     const nowId = e.target.id;
     const { title } = data;
-    setTermData({
-      type: title,
-      id: nowId,
-    });
-    readFile();
+
+    readFile(nowId, title);
     setIsMarkdownModalOpen(true);
   };
   const closeMarkdownModal = () => {
@@ -213,12 +210,12 @@ function MyApp()
     setIsMarkdownModalOpen(false);
     setForceRender((prev) => prev + 1);
   };
-  async function readFile()
+  async function readFile(nowId, title)
   {
     const data = termData;
     try
     {
-      const response = await api.post('/agreement/readterm', {data});
+      const response = await api.get('/agreement/readterm', {params: {nowId, title}});
 
       setReadTerm(response.data.content);
       console.log(response.data)
