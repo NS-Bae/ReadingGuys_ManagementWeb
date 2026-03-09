@@ -29,6 +29,7 @@ function MyApp()
   const [isBigModalOpen, setIsBigModalOpen] = useState(false);
   const [isMidModalOpen, setIsMidModalOpen] = useState(false);
   const [forceRender, setForceRender] = useState(0);
+  const [termData, setTermData] = useState({type: '', id: ''});
   const pageId = 'manager';
 
   const navigate = useNavigate();
@@ -85,8 +86,11 @@ function MyApp()
     }
     else if(buttonId === "toggle")
     {
-      console.log(bookInfo);
       changeData(bookInfo);
+    }
+    else if(buttonId === "toggle_term")
+    {
+      changeData(termData);
     }
     if(stateId === 'logout' || stateId === '학생' || stateId === 'notLogin')
     {
@@ -213,6 +217,18 @@ function MyApp()
     setButtonId('toggle');
     setIsModalOpen(true);
   };
+  const toggleActivation = (e, data) => {
+    const nowId = e.target.id;
+    const { title } = data;
+
+    setTermData({
+      type: title,
+      id: nowId,
+    });
+    setAlertMessage('약관의 공개상태를 바꾸겠습니까?');
+    setButtonId('toggle_term');
+    setIsModalOpen(true);
+  };
   const clickAddButton = () => {
     setIsBigModalOpen(true);
   };
@@ -230,7 +246,7 @@ function MyApp()
       setIsMidModalOpen(true);
     }
   };
-  
+
   async function deleteData()
   {
     try
@@ -320,7 +336,7 @@ function MyApp()
             <Workbook category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} handleToggle={handleToggle} />
           )}
           {category==='management_terms' && (
-            <Terms category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} />
+            <Terms category={category} forceRender={forceRender} toggleActivation = {toggleActivation} />
           )}
         </div>
         <div className='btn_section'>

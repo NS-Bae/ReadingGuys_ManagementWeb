@@ -25,7 +25,7 @@ const TermsList = ({ title, columns, info, handleToggle }) => {
               <td style={styles.table_data}>{info[i].createdBy}</td>
               <td style={styles.table_data}>{info[i].effectiveDate}</td>
               <td style={styles.table_data}>
-                <ToggleButton item={info[i]} handleToggle={handleToggle} />
+                <ToggleButton vaule={ info[i].title } id={ info[i].id } trueLabel="활성화" falseLabel="비활성화" handleToggle={ (e) => handleToggle(e, {title}) } />
               </td>
               <td><button>미리보기</button></td>
             </tr>

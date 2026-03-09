@@ -39,6 +39,7 @@ const changeInfo = ( category, data ) => {
     case "management_academy" : link = 'academy'; break;
     case "management_student" : link = 'users'; break;
     case "management_workbook" : link = 'workbook'; break;
+    case "management_terms" : link = 'agreement'; break;
     default: link = ''; break;
   };
   console.log(data);
