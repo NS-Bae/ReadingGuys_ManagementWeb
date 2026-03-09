@@ -37,7 +37,12 @@ const Table = ({category, columns, info, handleCheckboxChange, handleToggle}) =>
               <td style={styles.table_data}>{info[i].i3}</td>
               <td style={styles.table_data}>{info[i].i4}</td>
               <td style={styles.table_data}>
-                {category === 'management_workbook' ? <ToggleButton item={info[i]} handleToggle={handleToggle}/> : info[i].i5 }
+                {category === 'management_workbook' ? <ToggleButton value={ info[i].i5 === '유료공개' }
+                                                                    id={ `${info[i].i1}_${info[i].i2}`}
+                                                                    trueLabel="유료공개"
+                                                                    falseLabel="무료공개"
+                                                                    handleToggle={ handleToggle }
+                                                                      /> : info[i].i5 }
               </td>
             </tr>
           );

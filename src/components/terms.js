@@ -26,6 +26,8 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
     { key: "3", label: "작성일" },
     { key: "4", label: "작성자" },
     { key: "5", label: "시행일" },
+    { key: "6", label: "활성화" },
+    { key: "7", label: "미리보기" },
   ];
 
   const renderContent = () => {
@@ -33,31 +35,32 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
       return <div style={ rightContent }><TermsMarkdownEditor title='개인정보 처리방침 작성' value={documents.privacy} onChange={(txt) => handleChangeText('privacy', txt)} /></div>;
     }
     if (activeMenu.main === 'privacy' && activeMenu.action === 'history') {
-      return <TermsList title='개인정보 처리방침' columns = {columns} info = {list} handleToggle = {handleToggle} />;
+      return <TermsList title='개인정보 처리방침' columns = {columns} info = {list} handleToggle = {getAllTerms} />;
     }
     if (activeMenu.main === 'service' && activeMenu.action === 'edit') {
       return <div style={ rightContent }><TermsMarkdownEditor title='이용약관 작성' value={documents.service} onChange={(txt) => handleChangeText('service', txt)} /></div>;
     }
     if (activeMenu.main === 'service' && activeMenu.action === 'history') {
-      return <TermsList title='이용약관' columns = {columns} info = {list} handleToggle = {handleToggle} />;
+      return <TermsList title='이용약관' columns = {columns} info = {list} handleToggle = {getAllTerms} />;
     }
     if (activeMenu.main === 'credits' && activeMenu.action === 'edit') {
       return <div style={ rightContent }><TermsMarkdownEditor title='크레딧 작성' value={documents.credits} onChange={(txt) => handleChangeText('credits', txt)} /></div>;
     }
     if (activeMenu.main === 'credits' && activeMenu.action === 'history') {
-      return <TermsList title='크레딧' columns = {columns} info = {list} handleToggle = {handleToggle} />;
+      return <TermsList title='크레딧' columns = {columns} info = {list} handleToggle = {getAllTerms} />;
     }
     if (activeMenu.main === 'about' && activeMenu.action === 'edit') {
       return <div style={ rightContent }><TermsMarkdownEditor title='사업자 정보 작성' value={documents.about} onChange={(txt) => handleChangeText('about', txt)} /></div>;
     }
     if (activeMenu.main === 'about' && activeMenu.action === 'history') {
-      return <TermsList title='사업자 정보' columns = {columns} info = {list} handleToggle = {handleToggle} />;
+      return <TermsList title='사업자 정보' columns = {columns} info = {list} handleToggle = {getAllTerms} />;
     }
 
     return <div></div>;
   };
 
   const handleActiveType = ({ main, action }) => {
+    forceRender++;
     setActiveMenu({ main, action });
   };
   const handleChangeText = ( type, text ) => {
@@ -70,7 +73,6 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
   const clickAddButton = async() => {
     const { main } = activeMenu;
     const contents = documents[main];
-    console.log(contents);
     try
     {
       const response = await api.post('/agreement/adddata', { contents, main });
@@ -81,11 +83,11 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
     }
   };
 
-  const getAllTerms = useCallback( async() => {
-    setLoading(true);
+  const getAllTerms = async () => {
+    const { main } = activeMenu;
     try
     {
-      const response = await api.get('/agreement/alllist');
+      const response = await api.get('/agreement/alllist', { params: { main }, });
 
       setList(response.data);
     }
@@ -93,19 +95,18 @@ const Terms = ({ category, forceRender, handleCheckboxChange, handleToggle }) =>
     {
       console.error('약관로딩 실패', error);
     }
-    setLoading(false);
-  }, []);
+  };
 
   useEffect(() => {
       getAllTerms();
-      console.log(activeMenu);
-    }, [forceRender, getAllTerms]);
+      console.log(list);
+    }, [forceRender, activeMenu]);
 
   return (
     <>
       <div style={ bigBox }>
         <div style = { leftBox }><SidebarAccordion active={activeMenu} onChange={handleActiveType} /></div>
-        <div style={ rightBox }>{ loading ? <p>데이터 불러오는 중...</p> : renderContent() }</div>
+        <div style={ rightBox }>{ renderContent() }</div>
       </div>
       <div style = { buttonBox }>
         {activeMenu.main !== 'none' && activeMenu.action === 'edit' && <button id='add' style={ normalButton } onClick={clickAddButton}>등록하기</button>}

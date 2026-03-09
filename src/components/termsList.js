@@ -9,7 +9,6 @@ const TermsList = ({ title, columns, info, handleToggle }) => {
     <table style={styles.whole_table}>
       <thead style={styles.head_table}>
         <tr>
-          <td>체크</td>
           {columns.map((col) => (
             <td key={col.key}>{col.label}</td>
           ))}
@@ -20,13 +19,15 @@ const TermsList = ({ title, columns, info, handleToggle }) => {
           const rowKey =`${info[i].i1}_${info[i].i2}`;
           return (
             <tr key={rowKey} >
-              <td style={styles.table_data}>{info[i].i1}</td>
-              <td style={styles.table_data}>{info[i].i2}</td>
-              <td style={styles.table_data}>{info[i].i3}</td>
-              <td style={styles.table_data}>{info[i].i4}</td>
+              <td style={styles.table_data}>{info[i].id}</td>
+              <td style={styles.table_data}>{info[i].title}</td>
+              <td style={styles.table_data}>{info[i].createdAt}</td>
+              <td style={styles.table_data}>{info[i].createdBy}</td>
+              <td style={styles.table_data}>{info[i].effectiveDate}</td>
               <td style={styles.table_data}>
                 <ToggleButton item={info[i]} handleToggle={handleToggle} />
               </td>
+              <td><button>미리보기</button></td>
             </tr>
           );
         })}

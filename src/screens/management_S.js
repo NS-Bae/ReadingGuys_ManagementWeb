@@ -320,7 +320,7 @@ function MyApp()
             <Workbook category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} handleToggle={handleToggle} />
           )}
           {category==='management_terms' && (
-            <Terms category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} handleToggle={handleToggle} />
+            <Terms category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} />
           )}
         </div>
         <div className='btn_section'>

@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import styles from './toggleButtonStyle.ts';
 
-const ToggleButton = ({ item, handleToggle }) => {
-  const [isPaid, setIsPaid] = useState(item.i5 === '유료공개' ? true : false);
-  const btnId = `${item.i1}_${item.i2}`;
-  
+const ToggleButton = ({ value, handleToggle, id, trueLabel = '활성화', falseLabel = '비활성화', disabled = false }) => {
   return (
     <button
-      onClick={handleToggle} 
-      style={isPaid ? styles.paidToggle : styles.freeToggle }
-      id={btnId}
-      value={isPaid}>
-      {isPaid ? '유료공개' : '무료공개'}
+      onClick={ handleToggle }
+      style={ value ? styles.paidToggle : styles.freeToggle }
+      id={ id }
+      value={ value }
+      disabled={ disabled }
+    >
+      { value ? trueLabel : falseLabel }
     </button>
   );
 };
