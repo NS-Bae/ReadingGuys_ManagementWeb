@@ -2,28 +2,50 @@ name: ReadingGuys AdminWeb CI
 
 on:
   push:
-    branches: [main]
-  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: 1. 코드 가져오기
+        uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: 2. Node 설치
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - name: Install dependencies
+      - name: 3. 의존성 설치
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: 4. 환경파일 생성
+        run: |
+          cat << 'EOF' > .env.production
+          ${{ secrets.FRONTEND_ENV_PROD }}
+          EOF
 
-      - name: Build
+      - name: 5. 프론트 빌드
         run: npm run build
-        
+
+      - name: 6. SSH 키 설정
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 7. build 폴더 업로드
+        run: |
+          rsync -avz --delete \
+            ./build/ ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:/var/www/rg-management-web/build/
+
+      - name: 8. nginx 재로드
+        run: |
+          ssh ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} << 'EOF'
+            sudo nginx -t
+            sudo systemctl reload nginx
+          EOF
