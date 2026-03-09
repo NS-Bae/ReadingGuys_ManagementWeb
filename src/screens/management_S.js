@@ -17,6 +17,9 @@ import { verifyCookies } from '../utils/info.js';
 import { ManagerLogOut } from '../utils/auth.js';
 import { dataDelete, addFormInfo, addNormalInfo, changeInfo, updateNovation } from '../utils/managementData.js';
 
+import api from '../api';
+import ReadModal from '../components/markdownModal.js';
+
 function MyApp()
 {
   const [category, setCategory] = useState('basic');
@@ -28,8 +31,10 @@ function MyApp()
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBigModalOpen, setIsBigModalOpen] = useState(false);
   const [isMidModalOpen, setIsMidModalOpen] = useState(false);
+  const [isMarkdownModalOpen, setIsMarkdownModalOpen] = useState(false);
   const [forceRender, setForceRender] = useState(0);
   const [termData, setTermData] = useState({type: '', id: ''});
+  const [readTerm, setReadTerm] = useState('');
   const pageId = 'manager';
 
   const navigate = useNavigate();
@@ -192,6 +197,38 @@ function MyApp()
     setCheckedRows([]);
   };
 
+  //markdown modal
+  const handleMarkdownModal = (e, data) => {
+    const nowId = e.target.id;
+    const { title } = data;
+    setTermData({
+      type: title,
+      id: nowId,
+    });
+    readFile();
+    setIsMarkdownModalOpen(true);
+  };
+  const closeMarkdownModal = () => {
+    setReadTerm('');
+    setIsMarkdownModalOpen(false);
+    setForceRender((prev) => prev + 1);
+  };
+  async function readFile()
+  {
+    const data = termData;
+    try
+    {
+      const response = await api.post('/agreement/readterm', {data});
+
+      setReadTerm(response.data.content);
+      console.log(response.data)
+    }
+    catch(error)
+    {
+      console.error("읽어오는데 실패했습니다", error);
+    }
+  }
+
   const onNavbarButtonClick = (e) => {
     setCategory(e.target.id);
     setCheckedRows([]);
@@ -311,7 +348,14 @@ function MyApp()
     {
       const response = await changeInfo(category, data);
       console.log("추가 성공", response.data);
-      alert(`${response.data.updatedCount}개의 정보를 변경했습니다`);
+      if(category !== 'management_terms')
+      {
+        alert(`${response.data.updatedCount}개의 정보를 변경했습니다`);
+      }
+      else
+      {
+        alert(`${response.message}`);
+      }
       setForceRender((prev) => prev + 1);
     }
     catch(error)
@@ -336,7 +380,7 @@ function MyApp()
             <Workbook category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} handleToggle={handleToggle} />
           )}
           {category==='management_terms' && (
-            <Terms category={category} forceRender={forceRender} toggleActivation = {toggleActivation} />
+            <Terms category={category} forceRender={forceRender} toggleActivation = {toggleActivation} handleMarkdownModal={handleMarkdownModal} />
           )}
         </div>
         <div className='btn_section'>
@@ -376,6 +420,11 @@ function MyApp()
         onCancel={handleChangeCancel}
         checkedRow={checkedRows}
         category={category}
+      />
+      <ReadModal
+        isOpen={isMarkdownModalOpen}
+        onCancel={closeMarkdownModal}
+        data={readTerm}
       />
     </div>
   );

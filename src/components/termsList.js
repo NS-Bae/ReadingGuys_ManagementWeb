@@ -4,7 +4,7 @@ import styles from './tableStyle.ts';
 import ToggleButton from './ToggleButton';
 
 
-const TermsList = ({ title, columns, info, handleToggle }) => {
+const TermsList = ({ title, columns, info, handleToggle, handleMarkdownModal }) => {
   return (
     <table style={styles.whole_table}>
       <thead style={styles.head_table}>
@@ -25,9 +25,9 @@ const TermsList = ({ title, columns, info, handleToggle }) => {
               <td style={styles.table_data}>{info[i].createdBy}</td>
               <td style={styles.table_data}>{info[i].effectiveDate}</td>
               <td style={styles.table_data}>
-                <ToggleButton vaule={ info[i].title } id={ info[i].id } trueLabel="활성화" falseLabel="비활성화" handleToggle={ (e) => handleToggle(e, {title}) } />
+                <ToggleButton value={ info[i].status === 'ACTIVE' } id={ info[i].id } trueLabel="약관 활성화" falseLabel="약관 비활성화" handleToggle={ (e) => handleToggle(e, {title}) } />
               </td>
-              <td><button>미리보기</button></td>
+              <td><button style={smallButton} id={ info[i].id } onClick={(e) => handleMarkdownModal(e, {title})}>미리보기</button></td>
             </tr>
           );
         })}
@@ -37,3 +37,11 @@ const TermsList = ({ title, columns, info, handleToggle }) => {
 }
 
 export default TermsList;
+
+const smallButton = {
+  backgroundColor: 'white',
+  border: 0,
+  textAlign: 'center',
+  fontSize: '0.8em',
+  cursor: 'pointer',
+}

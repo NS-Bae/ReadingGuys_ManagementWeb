@@ -42,7 +42,6 @@ const changeInfo = ( category, data ) => {
     case "management_terms" : link = 'agreement'; break;
     default: link = ''; break;
   };
-  console.log(data);
   return api.post(`/${link}/changedata`, { data });
 };
 
