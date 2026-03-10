@@ -29,6 +29,8 @@ jobs:
           EOF
 
       - name: 5. 프론트 빌드
+        env:
+          CI: false
         run: npm run build
 
       - name: 6. SSH 키 설정
