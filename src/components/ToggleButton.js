@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styles from './toggleButtonStyle.ts';
 
 const ToggleButton = ({ value, handleToggle, id, trueLabel = '활성화', falseLabel = '비활성화', disabled = false }) => {

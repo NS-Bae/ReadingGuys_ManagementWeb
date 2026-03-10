@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import styles from './tableStyle.ts';
-import api from '../api';
 
 const UpdateTable = ({ onDataChange, columnInfo, checkedRow }) => {
   const [rows, setRows] = useState([]);

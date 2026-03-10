@@ -1,5 +1,5 @@
 import '../App.css';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import api from '../api';
 import SidebarAccordion from './sideSubNavBar';
@@ -7,7 +7,6 @@ import TermsMarkdownEditor from './termsEditor';
 import TermsList from './termsList';
 
 const Terms = ({ category, forceRender, toggleActivation, handleMarkdownModal }) => {
-  const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState({
     main : 'none',
     action : 'none',
@@ -75,7 +74,7 @@ const Terms = ({ category, forceRender, toggleActivation, handleMarkdownModal })
     const contents = documents[main];
     try
     {
-      const response = await api.post('/agreement/adddata', { contents, main });
+      await api.post('/agreement/adddata', { contents, main });
     }
     catch(error)
     {
@@ -125,7 +124,6 @@ const bigBox = {
   flexDirection: 'row',
   justifyContent: 'space-around',
   margin: 0,
-  padding: 0,
 };
 const leftBox = {
   display: 'flex',

@@ -8,7 +8,6 @@ import RegistBookForm from './registbook.js';
 const AddModal = ({ isOpen, onConfirm, onCancel, category }) => {
   const [rowCount, setRowCount] = useState(1);
   const [resetTrigger, setResetTrigger] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [tableData, setTableData] = useState([]);
   const studentColumns = [
     { key: "1", label: "ID", type: 'text' },

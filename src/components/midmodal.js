@@ -22,7 +22,6 @@ const ChangeModal = ({ isOpen, onConfirm, onCancel, checkedRow, category }) => {
   ];
 
   useEffect(() => {
-    console.log(checkedRow);
     if(!isOpen) {
       setTableData([]);
     }

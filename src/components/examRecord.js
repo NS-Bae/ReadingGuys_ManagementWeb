@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import ListTable from './listTable';
 
 const ExamRecord = ({ category, stuList/*학생*/ , info/*시험기록*/ , getExamRecord }) => {
-  const [student, setSutdent] = useState('');
+  const [student, setStudent] = useState('');
   const columns = [
     { key: "1", label: "학생 ID" },
     { key: "2", label: "문제집 이름" },
@@ -13,7 +13,6 @@ const ExamRecord = ({ category, stuList/*학생*/ , info/*시험기록*/ , getEx
 
   
   useEffect(() => {
-    console.log(student);
     getExamRecord(student);
   }, [student])
 
@@ -23,7 +22,7 @@ const ExamRecord = ({ category, stuList/*학생*/ , info/*시험기록*/ , getEx
   }, {});
   console.log(transformedData);
   const handleChange = (e) => {
-    setSutdent(e.target.value);
+    setStudent(e.target.value);
   };
   
   return (

@@ -11,7 +11,6 @@ const CustomModal = ({ isOpen, message, onConfirm, onCancel }) => {
       setIsHoveredConfirm(false);
       setIsHoveredCancel(false);
     }
-    console.log(message)
   }, [isOpen]);
 
   if (!isOpen) return null;

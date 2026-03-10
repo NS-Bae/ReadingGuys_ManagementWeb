@@ -212,7 +212,6 @@ function MyApp()
   };
   async function readFile(nowId, title)
   {
-    const data = termData;
     try
     {
       const response = await api.get('/agreement/readterm', {params: {nowId, title}});
