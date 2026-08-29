@@ -219,43 +219,163 @@ export function WorkbooksPanel() {
   const targets = () => selectedRows(rows, selected, row => String(row.workbookId));
   const upload = async(event) => {
     event.preventDefault();
-    if(!form.file) { setFormError('업로드할 ZIP 파일을 선택해 주세요.'); return; }
+    if(!form.file)
+    {
+      setFormError('업로드할 ZIP 파일을 선택해 주세요.');
+      return;
+    }
     const data = new FormData();
     ['workbookName', 'releaseMonth', 'Difficulty', 'Category', 'isPaid'].forEach(key => data.append(key, form[key]));
     data.append('file', form.file);
-    setBusy(true); setFormError(''); setNotice({ tone: 'info', message: '문제집을 업로드하고 있습니다. 파일 크기에 따라 시간이 걸릴 수 있습니다.' });
-    try { const response = await adminApi.workbooks.upload(data); setNotice({ tone: 'success', message: response.data.message || '문제집을 등록했습니다.' }); setOpen(false); await load(); }
-    catch(errorValue) { setNotice(null); setFormError(getApiErrorMessage(errorValue, '문제집을 업로드하지 못했습니다.')); }
-    finally { setBusy(false); }
+    setBusy(true);
+    setFormError('');
+    setNotice({ tone: 'info', message: '문제집을 업로드하고 있습니다. 파일 크기에 따라 시간이 걸릴 수 있습니다.' });
+    try
+    {
+      const response = await adminApi.workbooks.upload(data);
+      setNotice({ tone: 'success', message: response.data.message || '문제집을 등록했습니다.' });
+      setOpen(false);
+      await load();
+    }
+    catch(errorValue)
+    {
+      setNotice(null);
+      setFormError(getApiErrorMessage(errorValue, '문제집을 업로드하지 못했습니다.'));
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const toggle = async(row) => {
     if(!window.confirm(`'${row.workbookName}' 문제집의 유료/무료 상태를 바꿀까요?`)) return;
-    setBusy(true); setNotice(null);
-    try { const response = await adminApi.workbooks.togglePaid(row); setNotice({ tone: 'success', message: `${response.data.updatedCount ?? 1}개 문제집의 상태를 변경했습니다.` }); await load(); }
-    catch(errorValue) { setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '공개 상태를 변경하지 못했습니다.') }); }
-    finally { setBusy(false); }
+    setBusy(true);
+    setNotice(null);
+    try
+    {
+      const response = await adminApi.workbooks.togglePaid(row);
+      setNotice({ tone: 'success', message: `${response.data.updatedCount ?? 1}개 문제집의 상태를 변경했습니다.` });
+      await load();
+    }
+    catch(errorValue)
+    {
+      setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '공개 상태를 변경하지 못했습니다.')});
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const remove = async() => {
-    const books = targets(); if(!books.length || !window.confirm(`선택한 ${books.length}개 문제집을 삭제할까요?`)) return;
-    setBusy(true); setNotice(null);
-    try { const response = await adminApi.workbooks.remove(books); setNotice({ tone: 'success', message: `${response.data.deletedCount ?? books.length}개 문제집을 삭제했습니다.` }); setSelected(new Set()); await load(); }
-    catch(errorValue) { setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '문제집을 삭제하지 못했습니다.') }); }
-    finally { setBusy(false); }
+    const books = targets();
+    if(!books.length || !window.confirm(`선택한 ${books.length}개 문제집을 삭제할까요?`)) return;
+    setBusy(true);
+    setNotice(null);
+    try
+    {
+      const response = await adminApi.workbooks.remove(books);
+      setNotice({ tone: 'success', message: `${response.data.deletedCount ?? books.length}개 문제집을 삭제했습니다.` });
+      setSelected(new Set());
+      await load();
+    }
+    catch(errorValue)
+    {
+      setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '문제집을 삭제하지 못했습니다.')});
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const columns = [
-    { key: 'workbookId', label: '번호' }, { key: 'workbookName', label: '문제집명' }, { key: 'releaseMonth', label: '출시일', render: row => formatDate(row.releaseMonth) },
-    { key: 'Difficulty', label: '난이도', render: row => difficultyLabels[row.Difficulty] || row.Difficulty || '-' }, { key: 'WorkbookCategory', label: '분야', render: row => categoryLabels[row.WorkbookCategory] || row.WorkbookCategory || '융합' },
-    { key: 'isPaid', label: '이용 구분', render: row => <Badge tone={row.isPaid ? 'warning' : 'success'}>{row.isPaid ? '유료' : '무료'}</Badge> },
-    { key: 'action', label: '상태 변경', render: row => <Button small variant="ghost" disabled={busy} onClick={() => toggle(row)}>{row.isPaid ? '무료로 변경' : '유료로 변경'}</Button> },
+    { key: 'workbookId', label: '번호' },
+    { key: 'workbookName', label: '문제집명' },
+    { key: 'releaseMonth', label: '출시일', render: row => formatDate(row.releaseMonth) },
+    { key: 'Difficulty', label: '난이도', render: row => difficultyLabels[row.Difficulty] || row.Difficulty || '-' },
+    { key: 'WorkbookCategory', label: '분야', render: row => categoryLabels[row.WorkbookCategory] || row.WorkbookCategory || '융합' },
+    { key: 'isPaid', label: '이용 구분', render: row =>
+      <Badge tone={row.isPaid ? 'warning' : 'success'}>{row.isPaid ? '유료' : '무료'}</Badge>
+    },
+    { key: 'action', label: '상태 변경', render: row =>
+      <Button small variant="ghost" disabled={busy} onClick={() => toggle(row)}>{row.isPaid ? '무료로 변경' : '유료로 변경'}</Button>
+    },
   ];
-  return <>
-    <PageHeading eyebrow="WORKBOOKS" title="문제집 관리" description="독해 문제집의 난이도·분야·이용 구분을 관리합니다." action={<Button onClick={() => { setFormError(''); setOpen(true); }}>문제집 업로드</Button>} />
-    <Notice notice={notice} />
-    <section className="panel"><div className="panel-header"><div><h2 className="panel-title">문제집 라이브러리</h2><p className="panel-subtitle">총 {rows.length}권 · {selected.size}권 선택</p></div></div><div className="toolbar"><input className="search-input" value={search} onChange={event => setSearch(event.target.value)} placeholder="문제집명, 난이도, 분야로 검색" /><div className="toolbar-actions"><Button variant="danger" disabled={!selected.size || busy} onClick={remove}>삭제</Button></div></div>{loading ? <LoadingState /> : error ? <ErrorState message={error} onRetry={load} /> : <DataTable columns={columns} rows={filtered} rowKey={row => String(row.workbookId)} selectedKeys={selected} onSelect={setSelected} />}</section>
-    <Modal open={open} title="새 문제집 업로드" onClose={() => !busy && setOpen(false)} footer={<><Button variant="ghost" disabled={busy} onClick={() => setOpen(false)}>취소</Button><Button type="submit" form="workbook-form" disabled={busy}>{busy ? '업로드 중…' : '업로드'}</Button></>}>
-      <form id="workbook-form" onSubmit={upload}><div className="form-grid"><div className="field"><label htmlFor="book-name">문제집명</label><input id="book-name" className="input" required value={form.workbookName} onChange={event => setForm(value => ({ ...value, workbookName: event.target.value }))} /></div><div className="field"><label htmlFor="book-date">출시일</label><input id="book-date" className="input" type="date" required value={form.releaseMonth} onChange={event => setForm(value => ({ ...value, releaseMonth: event.target.value }))} /></div><div className="field"><label htmlFor="book-difficulty">난이도</label><select id="book-difficulty" className="select" value={form.Difficulty} onChange={event => setForm(value => ({ ...value, Difficulty: event.target.value }))}><option value="easy">초급</option><option value="normal">중급</option><option value="hard">고급</option></select></div><div className="field"><label htmlFor="book-category">분야</label><select id="book-category" className="select" value={form.Category} onChange={event => setForm(value => ({ ...value, Category: event.target.value }))}>{Object.entries(categoryLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div><div className="field"><label htmlFor="book-paid">이용 구분</label><select id="book-paid" className="select" value={form.isPaid} onChange={event => setForm(value => ({ ...value, isPaid: event.target.value }))}><option value="false">무료</option><option value="true">유료</option></select></div><div className="field"><label htmlFor="book-file">문제집 ZIP 파일</label><input id="book-file" className="input file-input" type="file" accept=".zip,application/zip" required onChange={event => setForm(value => ({ ...value, file: event.target.files?.[0] || null }))} /></div></div>{formError && <p className="form-error" role="alert">{formError}</p>}</form>
-    </Modal>
-  </>;
+  return (
+    <>
+      <PageHeading eyebrow="WORKBOOKS" title="문제집 관리" description="독해 문제집의 난이도·분야·이용 구분을 관리합니다." action={
+        <Button onClick={() => { setFormError(''); setOpen(true); }}>문제집 업로드</Button>
+      } />
+      <Notice notice={notice} />
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <h2 className="panel-title">문제집 라이브러리</h2>
+            <p className="panel-subtitle">총 {rows.length}권 · {selected.size}권 선택</p>
+          </div>
+        </div>
+        <div className="toolbar">
+          <input className="search-input" value={search} onChange={event => setSearch(event.target.value)} placeholder="문제집명, 난이도, 분야로 검색" />
+          <div className="toolbar-actions">
+            <Button variant="danger" disabled={!selected.size || busy} onClick={remove}>삭제</Button>
+          </div>
+        </div>
+        { loading ? 
+          <LoadingState /> :
+            error ?
+              <ErrorState message={error} onRetry={load} /> :
+              <DataTable columns={columns} rows={filtered} rowKey={row => String(row.workbookId)} selectedKeys={selected} onSelect={setSelected} />
+        }
+      </section>
+      <Modal open={open} titl="새 문제집 업로드" onClose={() => !busy && setOpen(false)} footer={
+        <>
+          <Button variant="ghost" disabled={busy} onClick={() => setOpen(false)}>취소</Button>
+          <Button type="submit" form="workbook-form" disabled={busy}>{busy ? '업로드 중…' : '업로드'}</Button>
+        </>
+      }>
+        <form id="workbook-form" onSubmit={upload}>
+          <div className="form-grid">
+            <div className="field">
+              <label htmlFor="book-name">문제집명</label>
+              <input id="book-name" className="input" required value={form.workbookName} onChange={event => setForm(value => ({ ...value, workbookName: event.target.value }))} />
+            </div>
+            <div className="field">
+              <label htmlFor="book-date">출시일</label>
+              <input id="book-date" className="input" type="date" required value={form.releaseMonth} onChange={event => setForm(value => ({ ...value, releaseMonth: event.target.value }))} />
+            </div>
+            <div className="field">
+              <label htmlFor="book-difficulty">난이도</label>
+              <select id="book-difficulty" className="select" value={form.Difficulty} onChange={event => setForm(value => ({ ...value, Difficulty: event.target.value }))}>
+                <option value="easy">초급</option>
+                <option value="normal">중급</option>
+                <option value="hard">고급</option>
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="book-category">분야</label>
+              <select id="book-category" className="select" value={form.Category} onChange={event => setForm(value => ({ ...value, Category: event.target.value }))}>
+                { Object.entries(categoryLabels).map(([value, label]) =>
+                  <option key={value} value={value}>{label}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="book-paid">이용 구분</label>
+              <select id="book-paid" className="select" value={form.isPaid} onChange={event => setForm(value => ({ ...value, isPaid: event.target.value }))}>
+                <option value="false">무료</option>
+                <option value="true">유료</option>
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="book-file">문제집 ZIP 파일</label>
+              <input id="book-file" className="input file-input" type="file" accept=".zip,application/zip" required onChange={event => setForm(value => ({ ...value, file: event.target.files?.[0] || null }))} />
+            </div>
+          </div>
+          { formError &&
+            <p className="form-error" role="alert">{ formError }</p>
+          }
+        </form>
+      </Modal>
+    </>
+  );
 }
 
 export function TermsPanel() {
@@ -271,42 +391,167 @@ export function TermsPanel() {
   const [form, setForm] = useState({ title: '', Version: '', effectiveDate: new Date().toISOString().slice(0, 16), contents: '' });
   const load = useCallback(async() => {
     setLoading(true); setError('');
-    try { const response = await adminApi.terms.list(type); setRows(Array.isArray(response.data) ? response.data : []); }
-    catch(errorValue) { setError(getApiErrorMessage(errorValue, '문서 목록을 불러오지 못했습니다.')); }
-    finally { setLoading(false); }
+    try
+    {
+      const response = await adminApi.terms.list(type);
+      setRows(Array.isArray(response.data) ? response.data : []);
+    }
+    catch(errorValue)
+    {
+      setError(getApiErrorMessage(errorValue, '문서 목록을 불러오지 못했습니다.'));
+    }
+    finally
+    {
+      setLoading(false);
+    }
   }, [type]);
   useEffect(() => { void load(); }, [load]);
   const create = async(event) => {
-    event.preventDefault(); setBusy(true); setNotice(null); setFormError('');
-    try { const response = await adminApi.terms.create({ main: type, ...form }); setNotice({ tone: 'success', message: response.data.message || '새 문서를 등록했습니다.' }); setEditorOpen(false); setForm({ title: '', Version: '', effectiveDate: new Date().toISOString().slice(0, 16), contents: '' }); await load(); }
-    catch(errorValue) { setFormError(getApiErrorMessage(errorValue, '문서를 등록하지 못했습니다.')); }
-    finally { setBusy(false); }
+    event.preventDefault();
+    setBusy(true);
+    setNotice(null);
+    setFormError('');
+    try
+    {
+      const response = await adminApi.terms.create({ main: type, ...form });
+      setNotice({ tone: 'success', message: response.data.message || '새 문서를 등록했습니다.' });
+      setEditorOpen(false);
+      setForm({ title: '', Version: '', effectiveDate: new Date().toISOString().slice(0, 16), contents: '' });
+      await load();
+    }
+    catch(errorValue)
+    {
+      setFormError(getApiErrorMessage(errorValue, '문서를 등록하지 못했습니다.'));
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const activate = async(row) => {
     if(row.status === 'ACTIVE' || !window.confirm(`'${row.title}' 문서를 현재 활성 문서로 지정할까요?`)) return;
-    setBusy(true); setNotice(null);
-    try { const response = await adminApi.terms.activate(type, row.id); setNotice({ tone: 'success', message: response.data.message || '문서를 활성화했습니다.' }); await load(); }
-    catch(errorValue) { setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '문서를 활성화하지 못했습니다.') }); }
-    finally { setBusy(false); }
+    setBusy(true);
+    setNotice(null);
+    try
+    {
+      const response = await adminApi.terms.activate(type, row.id);
+      setNotice({ tone: 'success', message: response.data.message || '문서를 활성화했습니다.' });
+      await load();
+    }
+    catch(errorValue)
+    {
+      setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '문서를 활성화하지 못했습니다.') });
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const read = async(row) => {
     setBusy(true); setNotice(null);
-    try { const response = await adminApi.terms.read(row.id); setPreview(response.data); }
-    catch(errorValue) { setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '문서 본문을 읽지 못했습니다.') }); }
-    finally { setBusy(false); }
+    try
+    {
+      const response = await adminApi.terms.read(row.id);
+      setPreview(response.data);
+    }
+    catch(errorValue)
+    {
+      setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '문서 본문을 읽지 못했습니다.') });
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const columns = [
-    { key: 'title', label: '제목' }, { key: 'Version', label: '버전' }, { key: 'effectiveDate', label: '시행일', render: row => formatDate(row.effectiveDate, true) }, { key: 'createdAt', label: '등록일', render: row => formatDate(row.createdAt, true) },
-    { key: 'status', label: '상태', render: row => <Badge tone={row.status === 'ACTIVE' ? 'success' : 'neutral'}>{row.status === 'ACTIVE' ? '활성' : '대기'}</Badge> },
-    { key: 'actions', label: '작업', render: row => <div className="button-row"><Button small variant="ghost" disabled={busy} onClick={() => read(row)}>본문 보기</Button><Button small variant="secondary" disabled={busy || row.status === 'ACTIVE'} onClick={() => activate(row)}>활성화</Button></div> },
+    { key: 'title', label: '제목' },
+    { key: 'Version', label: '버전' },
+    { key: 'effectiveDate', label: '시행일', render: row => formatDate(row.effectiveDate, true) },
+    { key: 'createdAt', label: '등록일', render: row => formatDate(row.createdAt, true) },
+    { key: 'status', label: '상태', render: row =>
+        <Badge tone={row.status === 'ACTIVE' ? 'success' : 'neutral'}>{row.status === 'ACTIVE' ? '활성' : '대기'}</Badge>
+    },
+    { key: 'actions', label: '작업', render: row =>
+        <div className="button-row">
+          <Button small variant="ghost" disabled={busy} onClick={() => read(row)}>본문 보기</Button>
+          <Button small variant="secondary" disabled={busy || row.status === 'ACTIVE'} onClick={() => activate(row)}>활성화</Button>
+        </div>
+    },
   ];
   return <>
-    <PageHeading eyebrow="DOCUMENTS" title="약관·앱 정보" description="앱에서 표시할 문서를 버전별로 등록하고 활성 문서를 지정합니다." action={<Button onClick={() => { setFormError(''); setEditorOpen(true); }}>새 문서 등록</Button>} />
+    <PageHeading eyebrow="DOCUMENTS" title="약관·앱 정보" description="앱에서 표시할 문서를 버전별로 등록하고 활성 문서를 지정합니다." action={
+      <Button onClick={() => { setFormError(''); setEditorOpen(true); }}>새 문서 등록</Button>
+      } 
+    />
     <Notice notice={notice} />
-    <section className="panel"><div className="panel-header"><div><h2 className="panel-title">문서 이력</h2><p className="panel-subtitle">한 종류에서 한 문서만 활성화할 수 있습니다.</p></div><select className="select type-select" value={type} onChange={event => setType(event.target.value)}>{Object.entries(termsLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>{loading ? <LoadingState /> : error ? <ErrorState message={error} onRetry={load} /> : <DataTable columns={columns} rows={rows} rowKey={row => String(row.id)} />}</section>
-    <Modal open={editorOpen} title={`${termsLabels[type]} 등록`} wide onClose={() => !busy && setEditorOpen(false)} footer={<><Button variant="ghost" disabled={busy} onClick={() => setEditorOpen(false)}>취소</Button><Button type="submit" form="terms-form" disabled={busy}>{busy ? '저장 중…' : '저장'}</Button></>}>
-      <form id="terms-form" onSubmit={create}><div className="form-grid"><div className="field"><label htmlFor="terms-title">문서 제목</label><input id="terms-title" className="input" required maxLength="100" value={form.title} onChange={event => setForm(value => ({ ...value, title: event.target.value }))} /></div><div className="field"><label htmlFor="terms-version">버전</label><input id="terms-version" className="input" required maxLength="45" placeholder="예: 1.0.0" value={form.Version} onChange={event => setForm(value => ({ ...value, Version: event.target.value }))} /></div><div className="field"><label htmlFor="terms-date">시행 일시</label><input id="terms-date" className="input" type="datetime-local" required value={form.effectiveDate} onChange={event => setForm(value => ({ ...value, effectiveDate: event.target.value }))} /></div></div>{formError && <p className="form-error" role="alert">{formError}</p>}<div className="editor-grid"><div className="editor-pane field"><label htmlFor="terms-content">Markdown 본문</label><textarea id="terms-content" className="textarea" required value={form.contents} onChange={event => setForm(value => ({ ...value, contents: event.target.value }))} /></div><div className="editor-pane"><p className="field-label">미리보기</p><div className="markdown-preview"><ReactMarkdown remarkPlugins={[remarkGfm]}>{form.contents || '본문을 입력하면 여기에 미리보기가 표시됩니다.'}</ReactMarkdown></div></div></div></form>
+    <section className="panel">
+      <div className="panel-header">
+        <div>
+          <h2 className="panel-title">문서 이력</h2>
+          <p className="panel-subtitle">한 종류에서 한 문서만 활성화할 수 있습니다.</p>
+        </div>
+        <select className="select type-select" value={type} onChange={event => setType(event.target.value)}>
+          { Object.entries(termsLabels).map(([value, label]) =>
+            <option key={value} value={value}>{label}</option>
+          )}
+        </select>
+      </div>
+      { loading ?
+        <LoadingState /> :
+        error ?
+          <ErrorState message={error} onRetry={load} /> :
+          <DataTable columns={columns} rows={rows} rowKey={row => String(row.id)} />
+      }
+    </section>
+    <Modal open={editorOpen} title={`${termsLabels[type]} 등록`} wide onClose={() => !busy && setEditorOpen(false)} footer={
+      <>
+        <Button variant="ghost" disabled={busy} onClick={() => setEditorOpen(false)}>취소</Button>
+        <Button type="submit" form="terms-form" disabled={busy}>{busy ? '저장 중…' : '저장'}</Button>
+      </>
+    }>
+      <form id="terms-form" onSubmit={create}>
+        <div className="form-grid">
+          <div className="field">
+            <label htmlFor="terms-title">문서 제목</label>
+            <input id="terms-title" className="input" required maxLength="100" value={form.title} onChange={event => setForm(value => ({ ...value, title: event.target.value }))} />
+          </div>
+          <div className="field">
+            <label htmlFor="terms-version">버전</label>
+            <input id="terms-version" className="input" required maxLength="45" placeholder="예: 1.0.0" value={form.Version} onChange={event => setForm(value => ({ ...value, Version: event.target.value }))} />
+          </div>
+          <div className="field">
+            <label htmlFor="terms-date">시행 일시</label>
+            <input id="terms-date" className="input" type="datetime-local" required value={form.effectiveDate} onChange={event => setForm(value => ({ ...value, effectiveDate: event.target.value }))} />
+          </div>
+        </div>
+        { formError &&
+          <p className="form-error" role="alert">{formError}</p>
+        }
+        <div className="editor-grid">
+          <div className="editor-pane field">
+            <label htmlFor="terms-content">Markdown 본문</label>
+            <textarea id="terms-content" className="textarea" required value={form.contents} onChange={event => setForm(value => ({ ...value, contents: event.target.value }))} />
+          </div>
+          <div className="editor-pane">
+            <p className="field-label">미리보기</p>
+            <div className="markdown-preview">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{form.contents || '본문을 입력하면 여기에 미리보기가 표시됩니다.'}</ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      </form>
     </Modal>
-    <Modal open={Boolean(preview)} title={preview?.title || '문서 본문'} wide onClose={() => setPreview(null)} footer={<Button onClick={() => setPreview(null)}>닫기</Button>}><div className="document-meta"><Badge tone={preview?.status === 'ACTIVE' ? 'success' : 'neutral'}>{preview?.status === 'ACTIVE' ? '활성' : '대기'}</Badge><span>버전 {preview?.Version || '-'}</span><span>시행 {formatDate(preview?.effectiveDate, true)}</span></div><article className="markdown-preview document-preview"><ReactMarkdown remarkPlugins={[remarkGfm]}>{preview?.content || ''}</ReactMarkdown></article></Modal>
+    <Modal open={Boolean(preview)} title={preview?.title || '문서 본문'} wide onClose={() => setPreview(null)} footer={
+      <Button onClick={() => setPreview(null)}>닫기</Button>
+    }>
+      <div className="document-meta">
+        <Badge tone={preview?.status === 'ACTIVE' ? 'success' : 'neutral'}>{preview?.status === 'ACTIVE' ? '활성' : '대기'}</Badge>
+        <span>버전 {preview?.Version || '-'}</span>
+        <span>시행 {formatDate(preview?.effectiveDate, true)}</span>
+      </div>
+      <article className="markdown-preview document-preview">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{preview?.content || ''}</ReactMarkdown>
+      </article>
+    </Modal>
   </>;
 }

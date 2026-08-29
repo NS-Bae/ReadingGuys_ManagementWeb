@@ -8,6 +8,7 @@ import { Modal } from '../components/ui';
 
 const items = [
   { key: 'academy', label: '내 학원' },
+  { key: 'users', label: '회원 관리' },
   { key: 'records', label: '학습 기록' },
 ];
 

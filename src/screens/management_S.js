@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import '../App.css';
 import AdminShell from '../components/AdminShell';
-import { AcademiesPanel, TermsPanel, UsersPanel, WorkbooksPanel } from '../components/adminPanels';
+import { AcademiesPanel, TermsPanel, WorkbooksPanel } from '../components/adminPanels';
 
 const items = [
   { key: 'academies', label: '학원 관리' },
-  { key: 'users', label: '회원 관리' },
   { key: 'workbooks', label: '문제집 관리' },
   { key: 'terms', label: '약관·앱 정보' },
 ];
