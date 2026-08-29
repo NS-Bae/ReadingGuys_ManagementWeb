@@ -15,7 +15,6 @@ export default function ManagementScreen() {
   return (
     <AdminShell role="관리자" active={active} onChange={setActive} items={items}>
       {active === 'academies' && <AcademiesPanel />}
-      {active === 'users' && <UsersPanel />}
       {active === 'workbooks' && <WorkbooksPanel />}
       {active === 'terms' && <TermsPanel />}
     </AdminShell>

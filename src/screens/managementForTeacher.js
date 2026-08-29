@@ -4,7 +4,7 @@ import { getApiErrorMessage } from '../api';
 import AdminShell from '../components/AdminShell';
 import { Badge, Button, DataTable, ErrorState, LoadingState, formatDate } from '../components/ui';
 import { adminApi } from '../utils/adminApi';
-import { Modal } from './ui';
+import { Modal } from '../components/ui';
 
 const items = [
   { key: 'academy', label: '내 학원' },
@@ -164,5 +164,6 @@ export default function TeacherManagementScreen() {
   return <AdminShell role="교사" active={active} onChange={setActive} items={items}>
     {active === 'academy' && <AcademyPanel academy={academy} studentCount={studentCount} roster={roster} loading={loading} error={error} reload={load} />}
     {active === 'records' && <RecordsPanel students={students} />}
+    {active === 'users' && <UsersPanel students={students} />}
   </AdminShell>;
 }
