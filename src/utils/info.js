@@ -1,37 +1,45 @@
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 
-const verifyCookies = ( type ) => {
-  const userToken = Cookies.get("access_token");
-
-  if(!userToken)
-  {
-    return { status: 'noToken', message: '로그인이 필요합니다.' };
-  }
+export const getSession = () => {
+  const token = Cookies.get('access_token');
+  if(!token) return null;
 
   try
   {
-    const decoded = jwtDecode(userToken);
+    const payload = jwtDecode(token);
+    if(payload.exp && payload.exp * 1000 <= Date.now())
+    {
+      Cookies.remove('access_token');
+      return null;
+    }
 
-    if(decoded.userType === "관리자")
-    {
-      return { status: 'managerAuthorized', message: '관리자만 접근 할 수 있습니다', userType: decoded.userType }
-    }
-    if(decoded.userType === "교사")
-    {
-      return { status: 'teacherAuthorized', message: '관리자만 접근 할 수 있습니다', userType: decoded.userType }
-    }
-    if(decoded.userType === "학생")
-    {
-      return { status: 'studentAuthorized', message: '관리자만 접근 할 수 있습니다', userType: decoded.userType }
-    }
-    
+    return {
+      token,
+      userType: payload.userType,
+      hashedUserId: payload.hashedUserId,
+      hashedAcademyId: payload.hashedAcademyId,
+      ok: payload.isItOk ?? payload.ok,
+    };
   }
   catch(error)
   {
-    console.error("토큰 디코딩 오류:", error);
-    return { status: 'invalid', message: '유효하지 않은 토큰입니다.' };
+    console.warn('로그인 쿠키를 해석하지 못했습니다.', error);
+    Cookies.remove('access_token');
+    return null;
   }
-}
+};
 
-export { verifyCookies };
+export const verifyCookies = () => {
+  const session = getSession();
+  if(!session) return { status: 'noToken', message: '로그인이 필요합니다.' };
+  if(session.userType === '관리자') return { status: 'managerAuthorized', userType: session.userType, session };
+  if(session.userType === '교사') return { status: 'teacherAuthorized', userType: session.userType, session };
+  return { status: 'studentAuthorized', message: '학생 계정은 관리자 페이지를 이용할 수 없습니다.', userType: session.userType, session };
+};
+
+export const getHomeForRole = (userType) => {
+  if(userType === '관리자') return '/managementPage';
+  if(userType === '교사') return '/forT';
+  return '/';
+};

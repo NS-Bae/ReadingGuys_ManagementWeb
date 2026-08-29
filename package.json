@@ -2,6 +2,7 @@
   "name": "mansgementweb",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://adminreadingguys.com",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -18,7 +19,7 @@
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.1.5",
-    "react-scripts": "^5.0.1",
+    "react-scripts": "5.0.1",
     "remark-gfm": "^4.0.1",
     "styled-components": "^6.1.19",
     "typescript": "^4.9.5",
