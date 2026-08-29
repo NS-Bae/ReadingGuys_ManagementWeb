@@ -58,30 +58,44 @@ export function AcademiesPanel() {
     if(!targets.length || !window.confirm(confirmMessage)) return;
     setBusy(true);
     setNotice(null);
-    try {
+    try
+    {
       const response = await action(targets);
       const count = response.data.updatedCount ?? response.data.deletedCount ?? targets.length;
       setNotice({ tone: 'success', message: `${count}개 학원의 ${successWord} 처리가 완료되었습니다.` });
       setSelected(new Set());
       await load();
-    } catch(errorValue) {
+    }
+    catch(errorValue)
+    {
       setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, `${successWord} 처리에 실패했습니다.`) });
-    } finally { setBusy(false); }
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const create = async(event) => {
     event.preventDefault();
     setBusy(true);
     setNotice(null);
     setFormError('');
-    try {
+    try
+    {
       const response = await adminApi.academies.create(form.academyId.trim(), form.academyName.trim());
       setNotice({ tone: 'success', message: `${response.data.createdCount ?? 1}개 학원을 등록했습니다.` });
       setForm({ academyId: '', academyName: '' });
       setOpen(false);
       await load();
-    } catch(errorValue) {
+    }
+    catch(errorValue)
+    {
       setFormError(getApiErrorMessage(errorValue, '학원을 등록하지 못했습니다.'));
-    } finally { setBusy(false); }
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const columns = [
     { key: 'academyName', label: '학원명' },
@@ -89,21 +103,56 @@ export function AcademiesPanel() {
     { key: 'startMonth', label: '구독 시작', render: row => formatDate(row.startMonth) },
     { key: 'endMonth', label: '구독 종료', render: row => formatDate(row.endMonth) },
   ];
-  return <>
-    <PageHeading eyebrow="ACADEMY" title="학원 관리" description="등록된 학원과 구독 상태를 한 번에 관리합니다." action={<Button onClick={() => { setFormError(''); setOpen(true); }}>새 학원 등록</Button>} />
+  return (
+  <>
+    <PageHeading eyebrow="ACADEMY" title="학원 관리" description="등록된 학원과 구독 상태를 한 번에 관리합니다." action={
+      <Button onClick={() => { setFormError(''); setOpen(true); }}>새 학원 등록</Button>
+    } />
     <Notice notice={notice} />
     <section className="panel">
-      <div className="panel-header"><div><h2 className="panel-title">전체 학원</h2><p className="panel-subtitle">총 {rows.length}개 · {selected.size}개 선택</p></div></div>
-      <div className="toolbar"><input className="search-input" value={search} onChange={event => setSearch(event.target.value)} placeholder="학원명으로 검색" /><div className="toolbar-actions"><Button variant="secondary" disabled={!selected.size || busy} onClick={() => runBulk(adminApi.academies.renew, '선택한 학원의 구독을 이번 달 말까지 갱신할까요?', '구독 갱신')}>구독 갱신</Button><Button variant="danger" disabled={!selected.size || busy} onClick={() => runBulk(adminApi.academies.remove, '선택한 학원을 삭제할까요? 관련 데이터에 영향을 줄 수 있습니다.', '삭제')}>삭제</Button></div></div>
-      {loading ? <LoadingState /> : error ? <ErrorState message={error} onRetry={load} /> : <DataTable columns={columns} rows={filtered} rowKey={row => row.hashedAcademyId} selectedKeys={selected} onSelect={setSelected} />}
+      <div className="panel-header">
+        <div>
+          <h2 className="panel-title">전체 학원</h2>
+          <p className="panel-subtitle">총 {rows.length}개 · {selected.size}개 선택</p>
+        </div>
+      </div>
+      <div className="toolbar">
+        <input className="search-input" value={search} onChange={event => setSearch(event.target.value)} placeholder="학원명으로 검색" />
+        <div className="toolbar-actions">
+          <Button variant="secondary" disabled={!selected.size || busy} onClick={() => runBulk(adminApi.academies.renew, '선택한 학원의 구독을 이번 달 말까지 갱신할까요?', '구독 갱신')}>구독 갱신</Button>
+          <Button variant="danger" disabled={!selected.size || busy} onClick={() => runBulk(adminApi.academies.remove, '선택한 학원을 삭제할까요? 관련 데이터에 영향을 줄 수 있습니다.', '삭제')}>삭제</Button>
+        </div>
+      </div>
+      { loading ? 
+        <LoadingState /> :
+        error ? 
+          <ErrorState message={error} onRetry={load} /> :
+          <DataTable columns={columns} rows={filtered} rowKey={row => row.hashedAcademyId} selectedKeys={selected} onSelect={setSelected} />}
     </section>
-    <Modal open={open} title="새 학원 등록" onClose={() => setOpen(false)} footer={<><Button variant="ghost" onClick={() => setOpen(false)}>취소</Button><Button type="submit" form="academy-form" disabled={busy}>등록</Button></>}>
-      <form id="academy-form" onSubmit={create}><div className="field"><label htmlFor="academy-id">학원 ID</label><input id="academy-id" className="input" required value={form.academyId} onChange={event => setForm(value => ({ ...value, academyId: event.target.value }))} autoComplete="off" /></div><div className="field"><label htmlFor="academy-name">학원명</label><input id="academy-name" className="input" required value={form.academyName} onChange={event => setForm(value => ({ ...value, academyName: event.target.value }))} /></div>{formError && <p className="form-error" role="alert">{formError}</p>}</form>
+    <Modal open={open} title="새 학원 등록" onClose={() => setOpen(false)} footer={
+      <>
+        <Button variant="ghost" onClick={() => setOpen(false)}>취소</Button>
+        <Button type="submit" form="academy-form" disabled={busy}>등록</Button>
+      </>
+    }>
+      <form id="academy-form" onSubmit={create}>
+        <div className="field">
+          <label htmlFor="academy-id">학원 ID</label>
+          <input id="academy-id" className="input" required value={form.academyId} onChange={event => setForm(value => ({ ...value, academyId: event.target.value }))} autoComplete="off" />
+        </div>
+        <div className="field">
+          <label htmlFor="academy-name">학원명</label>
+          <input id="academy-name" className="input" required value={form.academyName} onChange={event => setForm(value => ({ ...value, academyName: event.target.value }))} />
+        </div>
+        { formError &&
+          <p className="form-error" role="alert">{formError}</p>
+        }
+      </form>
     </Modal>
-  </>;
+  </>);
 }
 
-export function UsersPanel() {
+/* export function UsersPanel() {
   const loader = useCallback(() => adminApi.users.list(), []);
   const { rows, loading, error, load } = useRemoteList(loader);
   const [academies, setAcademies] = useState([]);
@@ -154,7 +203,7 @@ export function UsersPanel() {
       <form id="user-form" onSubmit={submit}><div className="form-grid"><div className="field"><label htmlFor="user-id">사용자 ID</label><input id="user-id" className="input" required disabled={modal === 'edit'} value={form.userId} onChange={event => setForm(value => ({ ...value, userId: event.target.value }))} /></div><div className="field"><label htmlFor="user-name">이름</label><input id="user-name" className="input" required disabled={modal === 'edit'} value={form.userName} onChange={event => setForm(value => ({ ...value, userName: event.target.value }))} /></div><div className="field"><label htmlFor="user-password">{modal === 'edit' ? '새 비밀번호 (변경 시에만)' : '비밀번호'}</label><input id="user-password" className="input" type="password" required={modal === 'create'} value={form.password} onChange={event => setForm(value => ({ ...value, password: event.target.value }))} /></div><div className="field"><label htmlFor="user-academy">학원</label><select id="user-academy" className="select" required disabled={modal === 'edit'} value={form.hashedAcademyId} onChange={event => setForm(value => ({ ...value, hashedAcademyId: event.target.value }))}><option value="">학원 선택</option>{academies.map(academy => <option key={academy.hashedAcademyId} value={academy.hashedAcademyId}>{academy.academyName}</option>)}</select></div><div className="field"><label htmlFor="user-type">사용자 구분</label><select id="user-type" className="select" value={form.userType} onChange={event => setForm(value => ({ ...value, userType: event.target.value }))}><option>학생</option><option>교사</option><option>관리자</option></select></div></div>{formError && <p className="form-error" role="alert">{formError}</p>}</form>
     </Modal>
   </>;
-}
+} */
 
 export function WorkbooksPanel() {
   const loader = useCallback(() => adminApi.workbooks.list(), []);
