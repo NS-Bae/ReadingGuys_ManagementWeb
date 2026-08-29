@@ -52,10 +52,51 @@ function AcademyPanel({ academy, studentCount, roster, loading, error, reload })
     { key: 'ok', label: '계정 상태', render: row => <Badge tone={row.ok ? 'success' : 'danger'}>{row.ok ? '활성' : '정지'}</Badge> },
   ];
   return <>
-    <div className="page-heading-row"><div><p className="eyebrow">MY ACADEMY</p><h1 className="page-title">{academy?.academyName || '내 학원'}</h1><p className="page-description">학원 구독 상태와 소속 회원을 확인합니다.</p></div><Button variant="ghost" onClick={reload}>새로고침</Button></div>
-    {loading ? <section className="panel"><LoadingState /></section> : error ? <section className="panel"><ErrorState message={error} onRetry={reload} /></section> : <>
-      <div className="stat-grid"><div className="stat-card"><p className="stat-label">소속 학생</p><p className="stat-value">{studentCount}명</p></div><div className="stat-card"><p className="stat-label">전체 계정</p><p className="stat-value">{roster.length}명</p></div><div className="stat-card"><p className="stat-label">구독 상태</p><p className="stat-value stat-with-badge"><Badge tone={academy?.paymentStatus ? 'success' : 'danger'}>{academy?.paymentStatus ? '사용 중' : '만료'}</Badge></p></div><div className="stat-card"><p className="stat-label">구독 종료</p><p className="stat-value stat-date">{formatDate(academy?.endMonth)}</p></div></div>
-      <section className="panel"><div className="panel-header"><div><h2 className="panel-title">소속 회원</h2><p className="panel-subtitle">학생과 교사 계정을 함께 표시합니다.</p></div></div><DataTable columns={columns} rows={roster} rowKey={row => row.hashedUserId} /></section>
+    <div className="page-heading-row">
+      <div>
+        <p className="eyebrow">MY ACADEMY</p>
+        <h1 className="page-title">{academy?.academyName || '내 학원'}</h1>
+        <p className="page-description">학원 구독 상태와 소속 회원을 확인합니다.</p>
+      </div>
+      <Button variant="ghost" onClick={reload}>새로고침</Button>
+    </div>
+    { loading ?
+      <section className="panel">
+        <LoadingState />
+      </section> : error ?
+        <section className="panel">
+          <ErrorState message={error} onRetry={reload} />
+        </section> : 
+        <>
+          <div className="stat-grid">
+            <div className="stat-card">
+              <p className="stat-label">소속 학생</p>
+              <p className="stat-value">{studentCount}명</p>
+            </div>
+            <div className="stat-card">
+              <p className="stat-label">전체 계정</p>
+              <p className="stat-value">{roster.length}명</p>
+            </div>
+            <div className="stat-card">
+              <p className="stat-label">구독 상태</p>
+              <p className="stat-value stat-with-badge">
+              <Badge tone={academy?.paymentStatus ? 'success' : 'danger'}>{academy?.paymentStatus ? '사용 중' : '만료'}</Badge>
+              </p>
+            </div>
+            <div className="stat-card">
+              <p className="stat-label">구독 종료</p>
+              <p className="stat-value stat-date">{formatDate(academy?.endMonth)}</p>
+            </div>
+          </div>
+    <section className="panel">
+      <div className="panel-header">
+        <div>
+          <h2 className="panel-title">소속 회원</h2>
+          <p className="panel-subtitle">학생과 교사 계정을 함께 표시합니다.</p>
+        </div>
+      </div>
+      <DataTable columns={columns} rows={roster} rowKey={row => row.hashedUserId} />
+    </section>
     </>}
   </>;
 }
@@ -90,10 +131,17 @@ function RecordsPanel({ students }) {
   </>;
 }
 
-export function UsersPanel() {
-  const loader = useCallback(() => adminApi.users.list(), []);
+export function UsersPanel({ academy })
+{
+  const academyId = academy?.hashedAcademyId || '';
+  const loader = useCallback(async () => {
+    const response = await adminApi.teacher.roster();
+    return {
+      ...response,
+      data: Array.isArray(response.data?.myAcademyStudent) ? response.data.myAcademyStudent : [],
+    };
+  }, []);
   const { rows, loading, error, load } = useRemoteList(loader);
-  const [academies, setAcademies] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState(null);
@@ -101,46 +149,192 @@ export function UsersPanel() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
   const [formError, setFormError] = useState('');
-  useEffect(() => { adminApi.academies.list().then(response => setAcademies(Array.isArray(response.data) ? response.data : [])).catch(() => setAcademies([])); }, []);
-  const key = row => `${row.hashedAcademyId}:${row.hashedUserId}`;
-  const filtered = useMemo(() => rows.filter(row => `${row.rawAcademyName} ${row.rawUserId} ${row.rawUserName} ${row.userType}`.toLowerCase().includes(search.toLowerCase())), [rows, search]);
+
+  const key = row => row.hashedUserId;
+  const filtered = useMemo(() =>
+    rows.filter(row => `${row.rawUserId || ''} ${row.rawUserName || ''} ${row.userType || ''}`
+                          .toLowerCase()
+                          .includes(search.toLowerCase())
+    ), [rows, search]);
   const targets = () => selectedRows(rows, selected, key);
-  const openCreate = () => { setFormError(''); setForm({ userId: '', password: '', userName: '', hashedAcademyId: academies[0]?.hashedAcademyId || '', userType: '학생' }); setModal('create'); };
-  const openEdit = () => { const row = targets()[0]; if(!row) return; setFormError(''); setForm({ userId: row.rawUserId, password: '', userName: row.rawUserName, hashedAcademyId: row.hashedAcademyId, userType: row.userType }); setModal('edit'); };
-  const submit = async(event) => {
-    event.preventDefault(); setBusy(true); setNotice(null); setFormError('');
-    try {
-      if(modal === 'create') {
-        const response = await adminApi.users.create(form);
+  const openCreate = () => {
+    if(!academyId)
+    {
+      setNotice({ tone: 'error', message: '로그인한 교사의 학원 정보를 확인할 수 없습니다.' });
+      return;
+    }
+
+    setFormError('');
+    setForm({
+      userId: '',
+      password: '',
+      userName: '',
+      userType: '학생',
+    });
+    setModal('create');
+  };
+  const openEdit = () => {
+    const row = targets()[0];
+    if(!row) return;
+
+    setFormError('');
+    setForm({
+      userId: row.rawUserId,
+      password: '',
+      userName: row.rawUserName,
+      userType: row.userType,
+    });
+    setModal('edit');
+  };
+  const submit = async event => {
+    event.preventDefault();
+  
+    if(!academyId)
+    {
+      setFormError('로그인한 교사의 학원 정보를 확인할 수 없습니다.');
+      return;
+    }
+  
+    setBusy(true);
+    setNotice(null);
+    setFormError('');
+  
+    const payload = {
+      ...form,
+      hashedAcademyId: academyId,
+    };
+  
+    try
+    {
+      if(modal === 'create')
+      {
+        const response = await adminApi.users.create(payload);
+  
         setNotice({ tone: 'success', message: `${response.data.addedCount ?? 1}명의 사용자를 등록했습니다.` });
-      } else {
-        const response = await adminApi.users.update(targets()[0].hashedUserId, form);
+      }
+      else
+      {
+        const target = targets()[0];
+  
+        if(!target)
+        {
+          throw new Error('변경할 사용자를 선택해 주세요.');
+        }
+  
+        const response = await adminApi.users.update(target.hashedUserId, payload);
+  
         setNotice({ tone: 'success', message: `${response.data.updatedCount ?? 1}명의 정보를 변경했습니다.` });
       }
-      setModal(null); setSelected(new Set()); await load();
-    } catch(errorValue) { setFormError(getApiErrorMessage(errorValue, '사용자 정보를 저장하지 못했습니다.')); }
-    finally { setBusy(false); }
+  
+      setModal(null);
+      setSelected(new Set());
+      await load();
+    }
+    catch(errorValue)
+    {
+      setFormError(getApiErrorMessage(errorValue, '사용자 정보를 저장하지 못했습니다.'));
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const remove = async() => {
     const selectedUsers = targets();
     if(!selectedUsers.length || !window.confirm(`선택한 ${selectedUsers.length}명의 사용자를 삭제할까요?`)) return;
-    setBusy(true); setNotice(null);
-    try { const response = await adminApi.users.remove(selectedUsers); setNotice({ tone: 'success', message: `${response.data.deletedCount ?? selectedUsers.length}명을 삭제했습니다.` }); setSelected(new Set()); await load(); }
-    catch(errorValue) { setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '사용자를 삭제하지 못했습니다.') }); }
-    finally { setBusy(false); }
+
+    setBusy(true);
+    setNotice(null);
+
+    try
+    {
+      const response = await adminApi.users.remove(selectedUsers);
+      setNotice({ tone: 'success', message: `${response.data.deletedCount ?? selectedUsers.length}명을 삭제했습니다.` });
+      setSelected(new Set());
+      await load();
+    }
+    catch(errorValue)
+    {
+      setNotice({ tone: 'error', message: getApiErrorMessage(errorValue, '사용자를 삭제하지 못했습니다.') });
+    }
+    finally
+    {
+      setBusy(false);
+    }
   };
   const columns = [
-    { key: 'rawAcademyName', label: '학원' }, { key: 'rawUserId', label: '사용자 ID' }, { key: 'rawUserName', label: '이름' }, { key: 'userType', label: '구분' },
-    { key: 'ok', label: '계정 상태', render: row => <Badge tone={row.ok ? 'success' : 'danger'}>{row.ok ? '활성' : '정지'}</Badge> },
+    { key: 'rawAcademyName', label: '학원' },
+    { key: 'rawUserId', label: '사용자 ID' },
+    { key: 'rawUserName', label: '이름' },
+    { key: 'userType', label: '구분' },
+    { key: 'ok', label: '계정 상태', render: row => 
+      <Badge tone={row.ok ? 'success' : 'danger'}>{row.ok ? '활성' : '정지'}</Badge>
+    },
   ];
-  return <>
-    <PageHeading eyebrow="USERS" title="회원 관리" description="학생·교사·관리자 계정을 등록하고 상태를 확인합니다." action={<Button onClick={openCreate}>새 회원 등록</Button>} />
-    <Notice notice={notice} />
-    <section className="panel"><div className="panel-header"><div><h2 className="panel-title">전체 회원</h2><p className="panel-subtitle">총 {rows.length}명 · {selected.size}명 선택</p></div></div><div className="toolbar"><input className="search-input" value={search} onChange={event => setSearch(event.target.value)} placeholder="학원, ID, 이름으로 검색" /><div className="toolbar-actions"><Button variant="secondary" disabled={selected.size !== 1 || busy} onClick={openEdit}>정보 변경</Button><Button variant="danger" disabled={!selected.size || busy} onClick={remove}>삭제</Button></div></div>{loading ? <LoadingState /> : error ? <ErrorState message={error} onRetry={load} /> : <DataTable columns={columns} rows={filtered} rowKey={key} selectedKeys={selected} onSelect={setSelected} />}</section>
-    <Modal open={Boolean(modal)} title={modal === 'create' ? '새 회원 등록' : '회원 정보 변경'} onClose={() => setModal(null)} footer={<><Button variant="ghost" onClick={() => setModal(null)}>취소</Button><Button type="submit" form="user-form" disabled={busy}>저장</Button></>}>
-      <form id="user-form" onSubmit={submit}><div className="form-grid"><div className="field"><label htmlFor="user-id">사용자 ID</label><input id="user-id" className="input" required disabled={modal === 'edit'} value={form.userId} onChange={event => setForm(value => ({ ...value, userId: event.target.value }))} /></div><div className="field"><label htmlFor="user-name">이름</label><input id="user-name" className="input" required disabled={modal === 'edit'} value={form.userName} onChange={event => setForm(value => ({ ...value, userName: event.target.value }))} /></div><div className="field"><label htmlFor="user-password">{modal === 'edit' ? '새 비밀번호 (변경 시에만)' : '비밀번호'}</label><input id="user-password" className="input" type="password" required={modal === 'create'} value={form.password} onChange={event => setForm(value => ({ ...value, password: event.target.value }))} /></div><div className="field"><label htmlFor="user-academy">학원</label><select id="user-academy" className="select" required disabled={modal === 'edit'} value={form.hashedAcademyId} onChange={event => setForm(value => ({ ...value, hashedAcademyId: event.target.value }))}><option value="">학원 선택</option>{academies.map(academy => <option key={academy.hashedAcademyId} value={academy.hashedAcademyId}>{academy.academyName}</option>)}</select></div><div className="field"><label htmlFor="user-type">사용자 구분</label><select id="user-type" className="select" value={form.userType} onChange={event => setForm(value => ({ ...value, userType: event.target.value }))}><option>학생</option><option>교사</option><option>관리자</option></select></div></div>{formError && <p className="form-error" role="alert">{formError}</p>}</form>
-    </Modal>
-  </>;
+  return (
+    <>
+      <PageHeading eyebrow="USERS" title="회원 관리" description="학생·교사·관리자 계정을 등록하고 상태를 확인합니다." action={
+        <Button onClick={openCreate}>새 회원 등록</Button>
+      } />
+      <Notice notice={notice} />
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <h2 className="panel-title">전체 회원</h2>
+            <p className="panel-subtitle">총 {rows.length}명 · {selected.size}명 선택</p>
+          </div>
+        </div>
+        <div className="toolbar">
+          <input className="search-input" value={search} onChange={event => setSearch(event.target.value)} placeholder="학원, ID, 이름으로 검색" />
+          <div className="toolbar-actions">
+            <Button variant="secondary" disabled={selected.size !== 1 || busy} onClick={openEdit}>정보 변경</Button>
+            <Button variant="danger" disabled={!selected.size || busy} onClick={remove}>삭제</Button>
+          </div>
+        </div>
+        { loading ?
+          <LoadingState /> :
+          error ?
+            <ErrorState message={error} onRetry={load} /> :
+            <DataTable columns={columns} rows={filtered} rowKey={key} selectedKeys={selected} onSelect={setSelected} />
+        }
+      </section>
+      <Modal open={Boolean(modal)} title={modal === 'create' ? '새 회원 등록' : '회원 정보 변경'} onClose={() => setModal(null)} footer={
+        <>
+          <Button variant="ghost" onClick={() => setModal(null)}>취소</Button>
+          <Button type="submit" form="user-form" disabled={busy}>저장</Button>
+        </>
+      }>
+        <form id="user-form" onSubmit={submit}>
+          <div className="form-grid">
+            <div className="field">
+              <label htmlFor="user-id">사용자 ID</label>
+              <input id="user-id" className="input" required disabled={modal === 'edit'} value={form.userId} onChange={event => setForm(value => ({ ...value, userId: event.target.value }))} />
+            </div>
+            <div className="field">
+              <label htmlFor="user-name">이름</label>
+              <input id="user-name" className="input" required disabled={modal === 'edit'} value={form.userName} onChange={event => setForm(value => ({ ...value, userName: event.target.value }))} />
+            </div>
+            <div className="field">
+              <label htmlFor="user-password">{modal === 'edit' ? '새 비밀번호 (변경 시에만)' : '비밀번호'}</label>
+              <input id="user-password" className="input" type="password" required={modal === 'create'} value={form.password} onChange={event => setForm(value => ({ ...value, password: event.target.value }))} />
+            </div>
+            <div className="field">
+              <label htmlFor="user-academy">소속 학원</label>
+              <input id="user-academy" className="input" value={academy?.academyName || ''} disabled />
+            </div>
+          <div className="field">
+            <label htmlFor="user-type">사용자 구분</label>
+            <select id="user-type" className="select" value={form.userType} onChange={event => setForm(value => ({ ...value, userType: event.target.value }))}>
+              <option>학생</option>
+              <option>교사</option>
+            </select>
+          </div>
+        </div>
+        { formError && <p className="form-error" role="alert">{formError}</p> }
+        </form>
+      </Modal>
+    </>
+  );
 }
 
 export default function TeacherManagementScreen() {
@@ -165,6 +359,6 @@ export default function TeacherManagementScreen() {
   return <AdminShell role="교사" active={active} onChange={setActive} items={items}>
     {active === 'academy' && <AcademyPanel academy={academy} studentCount={studentCount} roster={roster} loading={loading} error={error} reload={load} />}
     {active === 'records' && <RecordsPanel students={students} />}
-    {active === 'users' && <UsersPanel students={students} />}
+    {active === 'users' && <UsersPanel academy={academy} />}
   </AdminShell>;
 }
